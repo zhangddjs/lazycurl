@@ -15,7 +15,7 @@ type Model struct {
 	Cursor   int
 	BasePath string
 	// 目录展开状态的映射，用于跟踪每个目录是否展开
-	ExpandedDirs map[*model.FileNode]bool
+	ItemsUnderExpandedDir map[*model.FileNode]bool
 	// 存储每个目录下的文件列表
 	ExpandedDirItems map[*model.FileNode][]*model.FileNode
 }
@@ -23,9 +23,9 @@ type Model struct {
 func main() {
 	pwd, _ := os.Getwd()
 	model := Model{
-		ExpandedDirs:     make(map[*model.FileNode]bool),
-		ExpandedDirItems: make(map[*model.FileNode][]*model.FileNode),
-		BasePath:         pwd,
+		ItemsUnderExpandedDir: make(map[*model.FileNode]bool),
+		ExpandedDirItems:      make(map[*model.FileNode][]*model.FileNode),
+		BasePath:              pwd,
 	}
 	model.loadRootFiles()
 
@@ -86,6 +86,7 @@ func (m *Model) loadSubFiles(dir *model.FileNode) []*model.FileNode {
 				Level:      dir.Level + 1,
 			}
 			items = append(items, item)
+			m.ItemsUnderExpandedDir[item] = true
 		} else if fi, err := os.Stat(f); err == nil && fi.IsDir() {
 			item := &model.FileNode{
 				Name:       base,
@@ -95,6 +96,7 @@ func (m *Model) loadSubFiles(dir *model.FileNode) []*model.FileNode {
 				Level:      dir.Level + 1,
 			}
 			items = append(items, item)
+			m.ItemsUnderExpandedDir[item] = true
 		}
 	}
 	m.Items = append(m.Items[:m.Cursor+1], append(items, m.Items[m.Cursor+1:]...)...)
@@ -102,30 +104,34 @@ func (m *Model) loadSubFiles(dir *model.FileNode) []*model.FileNode {
 }
 
 func (m *Model) foldSubFiles(dir *model.FileNode) {
+	m.markNeedFoldFiles(dir)
+	m.doFold(dir)
+}
+
+func (m *Model) markNeedFoldFiles(dir *model.FileNode) {
 	if dir == nil {
 		return
 	}
-
-	itemsBeforeFold := m.Items
-	if dir.GetLevel() != 0 {
-		itemsBeforeFold = m.ExpandedDirItems[dir]
-	}
-	needFold := make(map[*model.FileNode]bool)
 	for _, item := range m.ExpandedDirItems[dir] {
-		needFold[item] = true
-	}
-
-	items := make([]*model.FileNode, 0)
-	for _, item := range itemsBeforeFold {
-		if !needFold[item] {
-			items = append(items, item)
-		}
 		if m.isDirExpanded(item) {
-			m.foldSubFiles(item)
-			m.ExpandedDirs[item] = !m.isDirExpanded(item)
+			m.markNeedFoldFiles(item)
 		}
+		delete(m.ItemsUnderExpandedDir, item)
 	}
 	delete(m.ExpandedDirItems, dir)
+}
+
+func (m *Model) doFold(dir *model.FileNode) {
+	if dir == nil {
+		return
+	}
+	items := make([]*model.FileNode, 0)
+	for _, item := range m.Items {
+		if !m.ItemsUnderExpandedDir[item] && item.GetLevel() > 0 {
+			continue
+		}
+		items = append(items, item)
+	}
 	m.Items = items
 }
 
@@ -159,7 +165,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					m.ExpandedDirItems[item] = m.loadSubFiles(item)
 				}
-				m.ExpandedDirs[item] = !m.isDirExpanded(item)
 			}
 
 			// 如果目录是展开的，可以在这里获取目录下的文件列表并更新到 m.DirFiles 中
@@ -193,14 +198,21 @@ func (m *Model) View() string {
 		} else {
 			view.WriteString("* ")
 		}
-		view.WriteString(item.GetName() + "\n")
+		view.WriteString(item.GetName())
+		if item.IsDir() {
+			view.WriteString("/")
+		}
+		view.WriteString("\n")
 	}
 
 	return view.String()
 }
 
 func (m *Model) isDirExpanded(dir *model.FileNode) bool {
-	return m.ExpandedDirs[dir]
+	if _, ok := m.ExpandedDirItems[dir]; !ok {
+		return false
+	}
+	return true
 }
 
 func (m *Model) getFilesInDir(dir *model.FileNode) []*model.FileNode {
