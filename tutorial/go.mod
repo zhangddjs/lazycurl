@@ -1,4 +1,4 @@
-module lazycurl/tutorial
+module github.com/zhangddjs/lazycurl/tutorial
 
 go 1.19
 
