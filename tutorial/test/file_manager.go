@@ -152,12 +152,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// The "down" and "j" keys move the cursor down
 		case "down", "j":
-			if m.Cursor < len(m.Items) {
+			if m.Cursor < len(m.Items)-1 {
 				m.Cursor++
 			}
 
 		case "enter":
-			// 当用户按下 Enter 键时，切换目录的展开状态
 			item := m.Items[m.Cursor]
 			if item.IsDir() {
 				if m.isDirExpanded(item) {
@@ -165,9 +164,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					m.ExpandedDirItems[item] = m.loadSubFiles(item)
 				}
+			} else if item.GetType() == model.FileType_Curl {
+				// TODO:implement
+				// 1. load file
+				// 2. analyze file into request method, params, body, header...
 			}
 
-			// 如果目录是展开的，可以在这里获取目录下的文件列表并更新到 m.DirFiles 中
 			return m, nil
 		}
 		// Handle keyboard input for navigation and interaction
