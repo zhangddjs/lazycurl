@@ -2,20 +2,28 @@ package component
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	fm "github.com/zhangddjs/lazycurl/component/filemanager"
+	vp "github.com/zhangddjs/lazycurl/component/viewport"
+	"github.com/zhangddjs/lazycurl/styles"
 )
 
 type sessionState uint
 
 const (
-	defaultTime              = time.Minute
-	timerView   sessionState = iota
+	fmView sessionState = iota
+	urlView
 	spinnerView
+)
+
+const (
+	MODEL_CNT   = 3
+	defaultTime = time.Minute
 )
 
 var (
@@ -31,100 +39,118 @@ var (
 		spinner.Moon,
 		spinner.Monkey,
 	}
-	modelStyle = lipgloss.NewStyle().
-			Width(15).
-			Height(5).
-			Align(lipgloss.Center, lipgloss.Center).
-			BorderStyle(lipgloss.HiddenBorder())
-	focusedModelStyle = lipgloss.NewStyle().
-				Width(15).
-				Height(5).
-				Align(lipgloss.Center, lipgloss.Center).
-				BorderStyle(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color("69"))
 	spinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("69"))
 	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 )
 
 type mainModel struct {
-	state   sessionState
-	timer   timer.Model
-	spinner spinner.Model
-	index   int
+	state       sessionState
+	url         vp.Model
+	spinner     spinner.Model
+	filemanager fm.Model
+	index       int
 }
 
 func NewModel(timeout time.Duration) mainModel {
-	m := mainModel{state: timerView}
-	m.timer = timer.New(timeout)
+	m := mainModel{state: fmView}
 	m.spinner = spinner.New()
+	m.filemanager = fm.New()
+	m.url = vp.New(44, 1)
 	return m
 }
 
 func (m mainModel) Init() tea.Cmd {
 	// start the timer and spinner on program start
-	return tea.Batch(m.timer.Init(), m.spinner.Tick)
+	return tea.Batch(m.spinner.Tick)
 }
 
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "tab":
-			if m.state == timerView {
-				m.state = spinnerView
-			} else {
-				m.state = timerView
-			}
+			m.SwitchToNextModel()
 		case "n":
-			if m.state == timerView {
-				m.timer = timer.New(defaultTime)
-				cmds = append(cmds, m.timer.Init())
-			} else {
+			if m.state == spinnerView {
 				m.Next()
 				m.resetSpinner()
 				cmds = append(cmds, m.spinner.Tick)
 			}
 		}
-		switch m.state {
-		// update whichever model is focused
-		case spinnerView:
-			m.spinner, cmd = m.spinner.Update(msg)
-			cmds = append(cmds, cmd)
-		default:
-			m.timer, cmd = m.timer.Update(msg)
-			cmds = append(cmds, cmd)
-		}
-	case spinner.TickMsg:
-		m.spinner, cmd = m.spinner.Update(msg)
-		cmds = append(cmds, cmd)
-	case timer.TickMsg:
-		m.timer, cmd = m.timer.Update(msg)
+	case tea.WindowSizeMsg:
+		m.url, cmd = m.url.Update(msg)
 		cmds = append(cmds, cmd)
 	}
+
+	switch m.state {
+	// update whichever model is focused
+	case spinnerView:
+		m.spinner, cmd = m.spinner.Update(msg)
+		cmds = append(cmds, cmd)
+	case fmView:
+		m.filemanager, cmd = m.filemanager.Update(msg)
+		cmds = append(cmds, cmd)
+	case urlView:
+		m.url, cmd = m.url.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+
 	return m, tea.Batch(cmds...)
 }
 
 func (m mainModel) View() string {
-	var s string
+	var s = strings.Builder{}
 	model := m.currentFocusedModel()
-	if m.state == timerView {
-		s += lipgloss.JoinHorizontal(lipgloss.Top, focusedModelStyle.Render(fmt.Sprintf("%4s", m.timer.View())), modelStyle.Render(m.spinner.View()))
-	} else {
-		s += lipgloss.JoinHorizontal(lipgloss.Top, modelStyle.Render(fmt.Sprintf("%4s", m.timer.View())), focusedModelStyle.Render(m.spinner.View()))
+	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, m.renderLogo(), m.renderMethod(), m.renderUrl()))
+	s.WriteString("\n")
+	str := lipgloss.JoinVertical(lipgloss.Left, m.renderSpinner(), m.renderSpinner())
+	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, m.renderFileManager(), str))
+	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
+	return s.String()
+}
+
+func (m mainModel) renderLogo() string {
+	return styles.LogoStyle.Render()
+}
+
+func (m mainModel) renderMethod() string {
+	// TODO: implement me
+	return styles.MethodStyle.Render()
+}
+
+func (m mainModel) renderUrl() string {
+	// TODO: implement me
+	if m.state == urlView {
+		return styles.FocusedUrlStyle.Render(m.url.View())
 	}
-	s += helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model))
-	return s
+	return styles.UrlStyle.Render(m.url.View())
+}
+
+func (m mainModel) renderSpinner() string {
+	if m.state == spinnerView {
+		return styles.FocusedModelStyle.Render(m.spinner.View())
+	}
+	return styles.ModelStyle.Render(m.spinner.View())
+}
+
+func (m mainModel) renderFileManager() string {
+	if m.state == fmView {
+		return styles.FocusedFileManagerStyle.Render(m.filemanager.View())
+	}
+	return styles.FileManagerStyle.Render(m.filemanager.View())
 }
 
 func (m mainModel) currentFocusedModel() string {
-	if m.state == timerView {
-		return "timer"
-	}
 	return "spinner"
+}
+
+func (m *mainModel) SwitchToNextModel() {
+	m.state = (m.state + 1) % MODEL_CNT
 }
 
 func (m *mainModel) Next() {

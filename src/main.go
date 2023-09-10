@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/zhangddjs/lazycurl/conf"
 	"log"
 	"time"
 
@@ -13,7 +14,11 @@ const (
 )
 
 func main() {
-	p := tea.NewProgram(component.NewModel(defaultTime))
+	p := tea.NewProgram(
+		component.NewModel(defaultTime),
+		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
+	)
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)

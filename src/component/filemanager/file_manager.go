@@ -1,4 +1,4 @@
-package component
+package filemanager
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/zhangddjs/lazycurl/tutorial/filemanager/model"
+	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 )
 
 type Model struct {
@@ -129,11 +129,11 @@ func (m *Model) doFold(dir *model.FileNode) {
 	m.Items = items
 }
 
-func (m *Model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -172,10 +172,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *Model) View() string {
+func (m Model) View() string {
 	var view strings.Builder
 
-	view.WriteString("Root Directory: " + m.BasePath + "\n\n")
+	// view.WriteString("Root Directory: " + m.BasePath + "\n\n")
 
 	for i, item := range m.Items {
 		if i == m.Cursor {
@@ -204,13 +204,13 @@ func (m *Model) View() string {
 	return view.String()
 }
 
-func (m *Model) isDirExpanded(dir *model.FileNode) bool {
+func (m Model) isDirExpanded(dir *model.FileNode) bool {
 	if _, ok := m.ExpandedDirItems[dir]; !ok {
 		return false
 	}
 	return true
 }
 
-func (m *Model) getFilesInDir(dir *model.FileNode) []*model.FileNode {
+func (m Model) getFilesInDir(dir *model.FileNode) []*model.FileNode {
 	return m.ExpandedDirItems[dir] // Change this according to your logic
 }
