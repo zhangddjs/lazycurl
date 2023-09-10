@@ -1,4 +1,4 @@
-package main
+package component
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/zhangddjs/lazycurl/tutorial/test/model"
+	"github.com/zhangddjs/lazycurl/tutorial/filemanager/model"
 )
 
 type Model struct {
@@ -34,6 +34,17 @@ func main() {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func New() Model {
+	pwd, _ := os.Getwd()
+	model := Model{
+		ItemsUnderExpandedDir: make(map[*model.FileNode]bool),
+		ExpandedDirItems:      make(map[*model.FileNode][]*model.FileNode),
+		BasePath:              pwd,
+	}
+	model.loadRootFiles()
+	return model
 }
 
 func (m *Model) loadRootFiles() []*model.FileNode {

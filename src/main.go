@@ -5,7 +5,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/zhangddjs/lazycurl/model"
+	"github.com/zhangddjs/lazycurl/component"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 )
 
 func main() {
-	p := tea.NewProgram(model.NewModel(defaultTime))
+	p := tea.NewProgram(component.NewModel(defaultTime))
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
