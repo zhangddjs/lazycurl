@@ -5,10 +5,20 @@ import "github.com/charmbracelet/lipgloss"
 // size
 var (
 	// filemanager
-	FileManagerW = 35
-	FileManagerH = 35
+	FileManagerW = 20
+	FileManagerH = 34
 
 	// logo
+	LogoW = 20
+	LogoH = 1
+
+	// Method
+	MethodW = 6
+	MethosH = 1
+
+	//Url
+	UrlW = 44
+	UrlH = 1
 )
 
 // color
@@ -33,41 +43,47 @@ var (
 				BorderForeground(highlight)
 
 	LogoStyle = lipgloss.NewStyle().
-			Width(20).
-			Height(1).
+			Width(LogoW).
+			Height(LogoH).
 			Align(lipgloss.Center, lipgloss.Center).
 			BorderStyle(lipgloss.NormalBorder()).
 			SetString("LazyCurl v0.0.1")
 
 	MethodStyle = lipgloss.NewStyle().
-			Width(6).
-			Height(1).
+			Width(MethodW).
+			Height(MethosH).
 			Align(lipgloss.Center, lipgloss.Center).
-			BorderStyle(lipgloss.NormalBorder()).
-			SetString("POST")
+			BorderStyle(lipgloss.NormalBorder())
+
+	FocusedMethodStyle = lipgloss.NewStyle().
+				Width(MethodW).
+				Height(MethosH).
+				Align(lipgloss.Center, lipgloss.Center).
+				BorderStyle(lipgloss.NormalBorder()).
+				BorderForeground(highlight)
 
 	UrlStyle = lipgloss.NewStyle().
-			Width(44).
-			Height(1).
+			Width(UrlW).
+			Height(UrlH).
 			Align(lipgloss.Center, lipgloss.Center).
 			BorderStyle(lipgloss.NormalBorder())
 
 	FocusedUrlStyle = lipgloss.NewStyle().
-			Width(44).
-			Height(1).
+			Width(UrlW).
+			Height(UrlH).
 			Align(lipgloss.Center, lipgloss.Center).
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(highlight)
 
 	FileManagerStyle = lipgloss.NewStyle().
-				Width(20).
-				Height(34).
+				Width(FileManagerW).
+				Height(FileManagerH).
 				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder())
 
 	FocusedFileManagerStyle = lipgloss.NewStyle().
-				Width(20).
-				Height(34).
+				Width(FileManagerW).
+				Height(FileManagerH).
 				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(highlight)

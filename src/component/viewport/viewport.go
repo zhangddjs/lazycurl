@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/zhangddjs/lazycurl/styles"
 )
 
 // You generally won't need this unless you're processing stuff with
@@ -90,6 +91,13 @@ func (m Model) View() string {
 		return "\n  Initializing..."
 	}
 	return fmt.Sprintf("%s", m.viewport.View())
+}
+
+func (m Model) RenderUrl(isActive bool) string {
+	if isActive {
+		return styles.FocusedUrlStyle.Render(m.View())
+	}
+	return styles.UrlStyle.Render(m.View())
 }
 
 func max(a, b int) int {

@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/zhangddjs/lazycurl/component/filemanager/model"
+	"github.com/zhangddjs/lazycurl/styles"
 )
 
 type Model struct {
@@ -202,6 +203,13 @@ func (m Model) View() string {
 	}
 
 	return view.String()
+}
+
+func (m Model) Render(isActive bool) string {
+	if isActive {
+		return styles.FocusedFileManagerStyle.Render(m.View())
+	}
+	return styles.FileManagerStyle.Render(m.View())
 }
 
 func (m Model) isDirExpanded(dir *model.FileNode) bool {
