@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	fm "github.com/zhangddjs/lazycurl/component/filemanager"
 	hm "github.com/zhangddjs/lazycurl/component/httpmethod"
+	"github.com/zhangddjs/lazycurl/component/textarea"
 	vp "github.com/zhangddjs/lazycurl/component/viewport"
 	"github.com/zhangddjs/lazycurl/styles"
 )
@@ -92,10 +93,11 @@ func (m mainModel) View() string {
 	logo := styles.LogoStyle.Render()
 	method := m.method.Render(m.isActive(methodView))
 	url := m.url.RenderUrl(m.isActive(urlView))
+	reqBody := styles.ModelStyle.Render(textarea.New().View())
 
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, logo, method, url))
 	s.WriteString("\n")
-	str := lipgloss.JoinVertical(lipgloss.Left, "  ", "  ")
+	str := lipgloss.JoinVertical(lipgloss.Left, reqBody, "  ")
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fm, str))
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
 	return s.String()
