@@ -29,7 +29,6 @@ func New(width, height int) Model {
 	m := Model{content: "https://www.youtube.com/watch?v=_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi"}
 	m.viewport = viewport.New(width, height)
 	m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
-	m.viewport.SetContent(m.content)
 	return m
 }
 
@@ -98,6 +97,15 @@ func (m Model) RenderUrl(isActive bool) string {
 		return styles.FocusedUrlStyle.Render(m.View())
 	}
 	return styles.UrlStyle.Render(m.View())
+}
+
+func (m Model) RenderRespBody(isActive bool, resp string) string {
+	m.content = resp
+	m.viewport.SetContent(m.content)
+	if isActive {
+		return styles.FocusedRespBodyStyle.Render(m.View())
+	}
+	return styles.RespBodyStyle.Render(m.View())
 }
 
 func max(a, b int) int {

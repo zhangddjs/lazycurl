@@ -6,6 +6,7 @@ package textarea
 import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/zhangddjs/lazycurl/styles"
 )
 
 type errMsg error
@@ -15,10 +16,13 @@ type Model struct {
 	err      error
 }
 
-func New() Model {
+func New(w, h int) Model {
 	ti := textarea.New()
 	ti.Placeholder = "Once upon a time..."
 	ti.Focus()
+	ti.SetHeight(h)
+	ti.SetWidth(w)
+	// TODO: max height, max width
 
 	return Model{
 		textarea: ti,
@@ -30,7 +34,7 @@ func (m Model) Init() tea.Cmd {
 	return textarea.Blink
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
@@ -63,4 +67,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	return m.textarea.View()
+}
+
+func (m Model) RenderReqBody(isActive bool) string {
+	if isActive {
+		return styles.FocusedTextAreaStyle.Render(m.View())
+	}
+	return styles.TextAreaStyle.Render(m.View())
 }

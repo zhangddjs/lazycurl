@@ -19,6 +19,14 @@ var (
 	//Url
 	UrlW = 44
 	UrlH = 1
+
+	//Req Body
+	ReqBodyW = 52
+	ReqBodyH = 16
+
+	//Req Body
+	RespBodyW = 52
+	RespBodyH = 16
 )
 
 // color
@@ -29,16 +37,16 @@ var (
 )
 
 var (
-	ModelStyle = lipgloss.NewStyle().
-			Width(52).
-			Height(16).
-			Align(lipgloss.Center, lipgloss.Center).
+	TextAreaStyle = lipgloss.NewStyle().
+			Width(ReqBodyW).
+			Height(ReqBodyH).
+			Align(lipgloss.Left, lipgloss.Top).
 			BorderStyle(lipgloss.NormalBorder())
 
-	FocusedModelStyle = lipgloss.NewStyle().
-				Width(52).
-				Height(16).
-				Align(lipgloss.Center, lipgloss.Center).
+	FocusedTextAreaStyle = lipgloss.NewStyle().
+				Width(ReqBodyW).
+				Height(ReqBodyH).
+				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(highlight)
 
@@ -84,6 +92,19 @@ var (
 	FocusedFileManagerStyle = lipgloss.NewStyle().
 				Width(FileManagerW).
 				Height(FileManagerH).
+				Align(lipgloss.Left, lipgloss.Top).
+				BorderStyle(lipgloss.NormalBorder()).
+				BorderForeground(highlight)
+
+	RespBodyStyle = lipgloss.NewStyle().
+			Width(RespBodyW).
+			Height(RespBodyH).
+			Align(lipgloss.Left, lipgloss.Top).
+			BorderStyle(lipgloss.NormalBorder())
+
+	FocusedRespBodyStyle = lipgloss.NewStyle().
+				Width(RespBodyW).
+				Height(RespBodyH).
 				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(highlight)
