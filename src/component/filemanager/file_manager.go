@@ -212,6 +212,19 @@ func (m Model) Render(isActive bool) string {
 	return styles.FileManagerStyle.Render(m.View())
 }
 
+// TODO:load the file from pwd
+// 1. get pwd
+// 2. read file into buffer
+// 3. send cmd and raw curl to main in purpose to update the other components
+// 4. analyze the file(need analyzer to do it), to get：
+// 		* request url
+// 		* request header
+// 		* request body
+// 		* request auth
+// 		* request method
+// 5. send analyzed data to other components
+//
+
 func (m Model) isDirExpanded(dir *model.FileNode) bool {
 	if _, ok := m.ExpandedDirItems[dir]; !ok {
 		return false

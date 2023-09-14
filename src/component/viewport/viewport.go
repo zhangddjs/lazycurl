@@ -25,8 +25,8 @@ type Model struct {
 	viewport viewport.Model
 }
 
-func New(width, height int) Model {
-	m := Model{content: "https://www.youtube.com/watch?v=_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi"}
+func New(width, height int, content string) Model {
+	m := Model{content: content}
 	m.viewport = viewport.New(width, height)
 	m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
 	return m
@@ -99,9 +99,7 @@ func (m Model) RenderUrl(isActive bool) string {
 	return styles.UrlStyle.Render(m.View())
 }
 
-func (m Model) RenderRespBody(isActive bool, resp string) string {
-	m.content = resp
-	m.viewport.SetContent(m.content)
+func (m Model) RenderRespBody(isActive bool) string {
 	if isActive {
 		return styles.FocusedRespBodyStyle.Render(m.View())
 	}

@@ -47,9 +47,9 @@ type mainModel struct {
 func NewModel(timeout time.Duration) mainModel {
 	m := mainModel{state: fmView}
 	m.filemanager = fm.New()
-	m.url = vp.New(styles.UrlW, styles.UrlH)
+	m.url = vp.New(styles.UrlW, styles.UrlH, "https://www.youtube.com/watch?v=\n_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi")
 	m.reqBody = ta.New(styles.ReqBodyW-2, styles.ReqBodyH)
-	m.respBody = vp.New(styles.RespBodyW, styles.RespBodyH) // TODO: fix scroll issue
+	m.respBody = vp.New(styles.RespBodyW, styles.RespBodyH, "{\n\taaa:bbb\n}")
 	return m
 }
 
@@ -108,7 +108,7 @@ func (m mainModel) View() string {
 	method := m.method.Render(m.isActive(methodView))
 	url := m.url.RenderUrl(m.isActive(urlView))
 	reqBody := m.reqBody.RenderReqBody(m.isActive(reqBodyView))
-	respBody := m.respBody.RenderRespBody(m.isActive(respBodyView), "{\n\taaa:bbb\n}")
+	respBody := m.respBody.RenderRespBody(m.isActive(respBodyView))
 
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, logo, method, url))
 	s.WriteString("\n")
