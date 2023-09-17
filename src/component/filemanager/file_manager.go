@@ -1,6 +1,7 @@
 package filemanager
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,23 @@ import (
 	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 	"github.com/zhangddjs/lazycurl/styles"
 )
+
+var (
+	ErrInvalidFileType = errors.New("file type not curl")
+)
+
+// TODO: need to add success type
+type SuccessMsg struct {
+	msg string
+}
+
+type ErrorMsg struct {
+	msg string
+}
+
+type AnalyzeMsg struct {
+	content string
+}
 
 type Model struct {
 	Items    []*model.FileNode
@@ -130,6 +148,43 @@ func (m *Model) doFold(dir *model.FileNode) {
 	m.Items = items
 }
 
+// readFile read file from disk
+func (m *Model) readFile() error {
+	item := m.GetCurItem()
+	if !item.IsCurl() {
+		return ErrInvalidFileType
+	}
+	path := item.GetFullName()
+	fileContent, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	contentStr := string(fileContent)
+	item.Buffer = contentStr
+	item.OriginContent = contentStr
+	// TODO: BufferManager append this item to buffer list
+
+	return nil
+}
+
+func Success(msg string) tea.Cmd {
+	return func() tea.Msg {
+		return SuccessMsg{msg}
+	}
+}
+
+func Error(msg string) tea.Cmd {
+	return func() tea.Msg {
+		return ErrorMsg{msg}
+	}
+}
+
+func Analyze(content string) tea.Cmd {
+	return func() tea.Msg {
+		return AnalyzeMsg{content}
+	}
+}
+
 func (m Model) Init() tea.Cmd {
 	return nil
 }
@@ -152,20 +207,26 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 
 		case "enter":
-			item := m.Items[m.Cursor]
+			item := m.GetCurItem()
 			if item.IsDir() {
 				if m.isDirExpanded(item) {
 					m.foldSubFiles(item)
 				} else {
 					m.ExpandedDirItems[item] = m.loadSubFiles(item)
 				}
-			} else if item.GetType() == model.FileType_Curl {
+			} else if item.IsCurl() {
 				// TODO:implement
 				// 1. load file
 				// 2. analyze file into request method, params, body, header...
+				// 3. if return err then show pop up
+				// 4. return cmd to refresh the text area of Request infomation
+				err := m.readFile()
+				if err != nil {
+					return m, Error(err.Error())
+				}
+				return m, Success("read file success")
 			}
 
-			return m, nil
 		}
 		// Handle keyboard input for navigation and interaction
 		// Implement file movement and editing logic here
@@ -224,6 +285,14 @@ func (m Model) Render(isActive bool) string {
 // 		* request method
 // 5. send analyzed data to other components
 //
+
+// GetCurItem get current file item
+func (m Model) GetCurItem() *model.FileNode {
+	if m.Cursor < 0 || m.Cursor >= len(m.Items) {
+		return nil
+	}
+	return m.Items[m.Cursor]
+}
 
 func (m Model) isDirExpanded(dir *model.FileNode) bool {
 	if _, ok := m.ExpandedDirItems[dir]; !ok {

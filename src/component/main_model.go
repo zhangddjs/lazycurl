@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/zhangddjs/lazycurl/component/filemanager"
 	fm "github.com/zhangddjs/lazycurl/component/filemanager"
 	hm "github.com/zhangddjs/lazycurl/component/httpmethod"
 	ta "github.com/zhangddjs/lazycurl/component/textarea"
@@ -94,6 +95,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 		m.respBody, cmd = m.respBody.Update(msg)
 		cmds = append(cmds, cmd)
+	case filemanager.SuccessMsg:
+		m.respBody.SetContent(m.filemanager.GetCurItem().GetOriginContent())
+		//m.respBody, cmd = m.respBody.Update(msg)
+		//cmds = append(cmds, cmd)
 	}
 
 	return m, tea.Batch(cmds...)

@@ -32,6 +32,11 @@ func New(width, height int, content string) Model {
 	return m
 }
 
+func (m *Model) SetContent(content string) {
+	m.content = content
+	m.viewport.SetContent(content)
+}
+
 func (m Model) Init() tea.Cmd {
 	return nil
 }

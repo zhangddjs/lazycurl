@@ -9,11 +9,13 @@ const (
 )
 
 type FileNode struct {
-	Name       string
-	Type       FileType
-	Path       string
-	ParentNode *FileNode
-	Level      int
+	Name          string
+	Buffer        string
+	OriginContent string
+	Type          FileType
+	Path          string
+	ParentNode    *FileNode
+	Level         int
 }
 
 func (f *FileNode) GetName() string {
@@ -21,6 +23,34 @@ func (f *FileNode) GetName() string {
 		return ""
 	}
 	return f.Name
+}
+
+func (f *FileNode) SetName(name string) {
+	if f == nil {
+		return
+	}
+	f.Name = name
+}
+
+func (f *FileNode) GetBuffer() string {
+	if f == nil {
+		return ""
+	}
+	return f.Buffer
+}
+
+func (f *FileNode) SetBuffer(buffer string) {
+	if f == nil {
+		return
+	}
+	f.Buffer = buffer
+}
+
+func (f *FileNode) GetOriginContent() string {
+	if f == nil {
+		return ""
+	}
+	return f.OriginContent
 }
 
 func (f *FileNode) GetType() FileType {
@@ -63,4 +93,11 @@ func (f *FileNode) IsDir() bool {
 		return false
 	}
 	return f.Type == FileType_Dir
+}
+
+func (f *FileNode) IsCurl() bool {
+	if f == nil {
+		return false
+	}
+	return f.Type == FileType_Curl
 }
