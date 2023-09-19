@@ -6,7 +6,11 @@ import "github.com/charmbracelet/lipgloss"
 var (
 	// filemanager
 	FileManagerW = 20
-	FileManagerH = 34
+	FileManagerH = 17
+
+	// filemanager
+	BufferManagerW = 20
+	BufferManagerH = 34
 
 	// logo
 	LogoW = 20
@@ -95,6 +99,19 @@ var (
 				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(highlight)
+
+	BufferManagerStyle = lipgloss.NewStyle().
+				Width(BufferManagerW).
+				Height(BufferManagerH).
+				Align(lipgloss.Left, lipgloss.Top).
+				BorderStyle(lipgloss.NormalBorder())
+
+	FocusedBufferManagerStyle = lipgloss.NewStyle().
+					Width(BufferManagerW).
+					Height(BufferManagerH).
+					Align(lipgloss.Left, lipgloss.Top).
+					BorderStyle(lipgloss.NormalBorder()).
+					BorderForeground(highlight)
 
 	RespBodyStyle = lipgloss.NewStyle().
 			Width(RespBodyW).

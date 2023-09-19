@@ -1,9 +1,6 @@
 package filemanager
 
 import (
-	"errors"
-	"os"
-	"path/filepath"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,7 +15,7 @@ type BufModel struct {
 }
 
 func NewBM() BufModel {
-	return BufModel{}
+	return BufModel{ExistingBuf: make(map[*model.FileNode]bool)}
 }
 
 func (m BufModel) Init() tea.Cmd {
@@ -53,8 +50,10 @@ func (m BufModel) Update(msg tea.Msg) (BufModel, tea.Cmd) {
 	case SuccessMsg:
 		if msg.Type == ReadFileSuccess {
 			data := msg.data.(ReadFileSuccessData)
-			data.Item.Name = "testtest.curl"
-
+			if !m.ExistingBuf[data.Item] {
+				m.ExistingBuf[data.Item] = true
+				m.Items = append(m.Items, data.Item)
+			}
 		}
 	}
 	return m, nil
@@ -62,8 +61,6 @@ func (m BufModel) Update(msg tea.Msg) (BufModel, tea.Cmd) {
 
 func (m BufModel) View() string {
 	var view strings.Builder
-
-	// view.WriteString("Root Directory: " + m.BasePath + "\n\n")
 
 	for i, item := range m.Items {
 		if i == m.Cursor {
@@ -73,15 +70,21 @@ func (m BufModel) View() string {
 		}
 		if item.Buffer != item.OriginContent {
 			view.WriteString("U ")
+		} else {
+			view.WriteString("  ")
 		}
 		view.WriteString(item.GetName())
-		if item.IsDir() {
-			view.WriteString("/")
-		}
 		view.WriteString("\n")
 	}
 
 	return view.String()
+}
+
+func (m BufModel) Render(isActive bool) string {
+	if isActive {
+		return styles.FocusedFileManagerStyle.Render(m.View())
+	}
+	return styles.FileManagerStyle.Render(m.View())
 }
 
 func (m BufModel) GetCurItem() *model.FileNode {

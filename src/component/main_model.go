@@ -24,6 +24,7 @@ var (
 
 const (
 	fmView sessionState = iota
+	bmView
 	methodView
 	urlView
 	reqBodyView
@@ -42,12 +43,14 @@ type mainModel struct {
 	reqBody     ta.Model
 	respBody    vp.Model
 	filemanager fm.Model
+	bufmanager  fm.BufModel
 	index       int
 }
 
 func NewModel(timeout time.Duration) mainModel {
 	m := mainModel{state: fmView}
 	m.filemanager = fm.New()
+	m.bufmanager = fm.NewBM()
 	m.url = vp.New(styles.UrlW, styles.UrlH, "https://www.youtube.com/watch?v=\n_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi")
 	m.reqBody = ta.New(styles.ReqBodyW-2, styles.ReqBodyH)
 	m.respBody = vp.New(styles.RespBodyW, styles.RespBodyH, "{\n\taaa:bbb\n}")
@@ -77,6 +80,9 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case fmView:
 			m.filemanager, cmd = m.filemanager.Update(msg)
 			cmds = append(cmds, cmd)
+		case bmView:
+			m.bufmanager, cmd = m.bufmanager.Update(msg)
+			cmds = append(cmds, cmd)
 		case urlView:
 			m.url, cmd = m.url.Update(msg)
 			cmds = append(cmds, cmd)
@@ -98,6 +104,8 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case filemanager.SuccessMsg:
 		// TODO: switch  success type
 		m.respBody.SetContent(m.filemanager.GetCurItem().GetOriginContent())
+		m.bufmanager, cmd = m.bufmanager.Update(msg)
+		cmds = append(cmds, cmd)
 		//m.respBody, cmd = m.respBody.Update(msg)
 		//cmds = append(cmds, cmd)
 	}
@@ -110,6 +118,7 @@ func (m mainModel) View() string {
 	model := m.currentFocusedModel()
 
 	fm := m.filemanager.Render(m.isActive(fmView))
+	bm := m.bufmanager.Render(m.isActive(bmView))
 	logo := styles.LogoStyle.Render()
 	method := m.method.Render(m.isActive(methodView))
 	url := m.url.RenderUrl(m.isActive(urlView))
@@ -118,8 +127,9 @@ func (m mainModel) View() string {
 
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, logo, method, url))
 	s.WriteString("\n")
-	str := lipgloss.JoinVertical(lipgloss.Left, reqBody, respBody)
-	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fm, str))
+	fmField := lipgloss.JoinVertical(lipgloss.Left, fm, bm)
+	txtArea := lipgloss.JoinVertical(lipgloss.Left, reqBody, respBody)
+	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fmField, txtArea))
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
 	return s.String()
 }
