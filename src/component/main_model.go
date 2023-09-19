@@ -96,6 +96,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.respBody, cmd = m.respBody.Update(msg)
 		cmds = append(cmds, cmd)
 	case filemanager.SuccessMsg:
+		// TODO: switch  success type
 		m.respBody.SetContent(m.filemanager.GetCurItem().GetOriginContent())
 		//m.respBody, cmd = m.respBody.Update(msg)
 		//cmds = append(cmds, cmd)

@@ -15,19 +15,6 @@ var (
 	ErrInvalidFileType = errors.New("file type not curl")
 )
 
-// TODO: need to add success type
-type SuccessMsg struct {
-	msg string
-}
-
-type ErrorMsg struct {
-	msg string
-}
-
-type AnalyzeMsg struct {
-	content string
-}
-
 type Model struct {
 	Items    []*model.FileNode
 	Cursor   int
@@ -150,6 +137,7 @@ func (m *Model) doFold(dir *model.FileNode) {
 
 // readFile read file from disk
 func (m *Model) readFile() error {
+	// TODO: if already opened then no need to read io again
 	item := m.GetCurItem()
 	if !item.IsCurl() {
 		return ErrInvalidFileType
@@ -165,24 +153,6 @@ func (m *Model) readFile() error {
 	// TODO: BufferManager append this item to buffer list
 
 	return nil
-}
-
-func Success(msg string) tea.Cmd {
-	return func() tea.Msg {
-		return SuccessMsg{msg}
-	}
-}
-
-func Error(msg string) tea.Cmd {
-	return func() tea.Msg {
-		return ErrorMsg{msg}
-	}
-}
-
-func Analyze(content string) tea.Cmd {
-	return func() tea.Msg {
-		return AnalyzeMsg{content}
-	}
 }
 
 func (m Model) Init() tea.Cmd {
@@ -222,9 +192,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				// 4. return cmd to refresh the text area of Request infomation
 				err := m.readFile()
 				if err != nil {
-					return m, Error(err.Error())
+					return m, Error(ReadFileError, err.Error())
 				}
-				return m, Success("read file success")
+				return m, Success(ReadFileSuccess, ReadFileSuccessData{item})
 			}
 
 		}
