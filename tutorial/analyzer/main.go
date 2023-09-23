@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
+	"strings"
 
 	flags "github.com/jessevdk/go-flags"
 	sw "github.com/mattn/go-shellwords"
 )
 
 func main() {
-	// analyzeFile()
-	analyze()
+	analyzeFile()
+	// analyze()
 }
 
 type Curl struct {
@@ -20,7 +22,8 @@ type Curl struct {
 	Header      []string `short:"H" long:"header" description:"curl headers"`
 	Method      string   `short:"X" long:"request" description:"request command"`
 	Body        string   `short:"d" long:"data" description:"curl request body"`
-	Form        string   `short:"F" long:"form" description:"Specify multipart MIME data"`
+	Form        []string `short:"F" long:"form" description:"Specify multipart MIME data"`
+	FormString  []string `long:"form-string" description:"Specify multipart MIME data"`
 	User        string   `short:"u" long:"user" description:"Server user and password"`
 	Verbose     []bool   `short:"v" long:"verbose" description:"make the operation more talkative"`
 	RemoteName  []bool   `short:"O" long:"remote-name" description:"Write output to a file named as the remote file"`
@@ -71,8 +74,66 @@ type Curl struct {
 	Rawcurl             string
 }
 
+func (c Curl) BuildCurlCmd() string {
+	cmdParts := make([]string, 0)
+	boolParts := make([]string, 0)
+	val := reflect.ValueOf(c)
+	typ := reflect.TypeOf(c)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldType := typ.Field(i)
+
+		shortTag := fieldType.Tag.Get("short")
+		longTag := fieldType.Tag.Get("long")
+		if longTag == "url" {
+			continue
+		}
+		flag := fmt.Sprintf("--%s", longTag)
+		if shortTag != "" {
+			flag = fmt.Sprintf("-%s", shortTag)
+		}
+
+		fieldIntf := field.Interface()
+		switch fieldIntf.(type) {
+		case string:
+			cmd := field.String()
+			if cmd != "" {
+				cmdParts = append(cmdParts, fmt.Sprintf("%s '%s'", flag, cmd))
+			}
+		case []string:
+			cmds := fieldIntf.([]string)
+			if len(cmds) > 0 {
+				for _, cmd := range cmds {
+					cmdParts = append(cmdParts, fmt.Sprintf("%s '%s'", flag, cmd))
+				}
+			}
+		case []bool:
+			cmds := fieldIntf.([]bool)
+			if len(cmds) > 0 {
+				boolParts = append(boolParts, fmt.Sprintf("%s", flag))
+			}
+		}
+	}
+
+	var res strings.Builder
+	res.WriteString("curl '")
+	res.WriteString(c.Url)
+	res.WriteString("'")
+	if len(cmdParts) > 0 {
+		res.WriteString(" \\\n")
+		res.WriteString(strings.Join(cmdParts, " \\\n"))
+	}
+	if len(boolParts) > 0 {
+		res.WriteString(" \\\n")
+		res.WriteString(strings.Join(boolParts, " "))
+	}
+
+	return res.String()
+}
+
 func analyze() {
-	s := "curl -LIOvk4 --http1.0 -X POST -# --progress-bar -F \"aaa.file\" -u root:123 -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}' https://example.com/api"
+	s := "curl -LIOvk4 --http1.0 -X POST -# --progress-bar -F \"test.file\" -F \"aaa.file\" -u root:123 -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}' https://example.com/api"
 	cmdParts, err := sw.Parse(s)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -80,8 +141,14 @@ func analyze() {
 	}
 	res := Curl{}
 	args, _ := flags.ParseArgs(&res, cmdParts)
-	fmt.Println("Curl:", res)
-	fmt.Println("arg:", args)
+	if len(args) > 1 {
+		res.Url = args[1]
+	}
+	// fmt.Println("Curl:", res)
+	// fmt.Println("arg:", args)
+
+	cmdstr := res.BuildCurlCmd()
+	fmt.Println(cmdstr)
 }
 
 func analyzeFile() {
@@ -92,7 +159,12 @@ func analyzeFile() {
 		fmt.Println(err.Error())
 		return
 	}
-	_, err = flags.ParseArgs(&res, cmdParts)
-	fmt.Println("curl:", cmdParts)
-	fmt.Println("headers:", res.Header[0])
+	args, err := flags.ParseArgs(&res, cmdParts)
+	if len(args) > 1 {
+		res.Url = args[1]
+	}
+	// fmt.Println("curl:", cmdParts)
+	// fmt.Println("headers:", res.Header[0])
+	cmdstr := res.BuildCurlCmd()
+	fmt.Println(cmdstr)
 }

@@ -1,11 +1,14 @@
 package analyzer
 
 import (
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	flags "github.com/jessevdk/go-flags"
 	sw "github.com/mattn/go-shellwords"
 	"github.com/zhangddjs/lazycurl/component/filemanager"
 	"github.com/zhangddjs/lazycurl/component/filemanager/model"
+	"reflect"
+	"strings"
 )
 
 type Curl struct {
@@ -15,7 +18,8 @@ type Curl struct {
 	Header      []string `short:"H" long:"header" description:"curl headers"`
 	Method      string   `short:"X" long:"request" description:"request command"`
 	Body        string   `short:"d" long:"data" description:"curl request body"`
-	Form        string   `short:"F" long:"form" description:"Specify multipart MIME data"`
+	Form        []string `short:"F" long:"form" description:"Specify multipart MIME data"`
+	FormString  []string `long:"form-string" description:"Specify multipart MIME data"`
 	User        string   `short:"u" long:"user" description:"Server user and password"`
 	Verbose     []bool   `short:"v" long:"verbose" description:"make the operation more talkative"`
 	RemoteName  []bool   `short:"O" long:"remote-name" description:"Write output to a file named as the remote file"`
@@ -64,6 +68,64 @@ type Curl struct {
 	CookieJar           string `short:"c" long:"cookie-jar" description:"Write cookies to <filename> after operation"`
 	Cert                string `short:"E" long:"Cert" description:"Client certificate file and password"`
 	Rawcurl             string
+}
+
+func (c Curl) BuildCurlCmd() string {
+	cmdParts := make([]string, 0)
+	boolParts := make([]string, 0)
+	val := reflect.ValueOf(c)
+	typ := reflect.TypeOf(c)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldType := typ.Field(i)
+
+		shortTag := fieldType.Tag.Get("short")
+		longTag := fieldType.Tag.Get("long")
+		if longTag == "url" {
+			continue
+		}
+		flag := fmt.Sprintf("--%s", longTag)
+		if shortTag != "" {
+			flag = fmt.Sprintf("-%s", shortTag)
+		}
+
+		fieldIntf := field.Interface()
+		switch fieldIntf.(type) {
+		case string:
+			cmd := field.String()
+			if cmd != "" {
+				cmdParts = append(cmdParts, fmt.Sprintf("%s '%s'", flag, cmd))
+			}
+		case []string:
+			cmds := fieldIntf.([]string)
+			if len(cmds) > 0 {
+				for _, cmd := range cmds {
+					cmdParts = append(cmdParts, fmt.Sprintf("%s '%s'", flag, cmd))
+				}
+			}
+		case []bool:
+			cmds := fieldIntf.([]bool)
+			if len(cmds) > 0 {
+				boolParts = append(boolParts, fmt.Sprintf("%s", flag))
+			}
+		}
+	}
+
+	var res strings.Builder
+	res.WriteString("curl '")
+	res.WriteString(c.Url)
+	res.WriteString("'")
+	if len(cmdParts) > 0 {
+		res.WriteString(" \\\n")
+		res.WriteString(strings.Join(cmdParts, " \\\n"))
+	}
+	if len(boolParts) > 0 {
+		res.WriteString(" \\\n")
+		res.WriteString(strings.Join(boolParts, " "))
+	}
+
+	return res.String()
 }
 
 type Model struct {

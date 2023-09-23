@@ -1,15 +1,15 @@
-curl 'https://www.amazon.com/shoppingaids/fetchshoppingaids?page=search&url=https%3A%2F%2Fwww.amazon.com%2Fs%3Fk%3Dtest%26ref%3Dnav_bb_sb&trafficType=INDIRECT&cacheTTL=15&cacheVersion=1.0&previousLop=en_US&currentLop=en-US' \
+curl 'https://www.amazon.com/shoppingaids/fetchshoppingaids?page=search&url=https%3A%2F%2Fwww.amazon.com%2Fs%3Fk%3Dapple%26crid%3D3FC44DJHPX850%26sprefix%3Dappl%252Caps%252C416%26ref%3Dnb_sb_noss_2&trafficType=INDIRECT&cacheTTL=15&cacheVersion=1.0&previousLop=en_US&currentLop=en-US' \
   -H 'authority: www.amazon.com' \
   -H 'accept: text/html,*/*' \
   -H 'accept-language: en,zh-CN;q=0.9,zh;q=0.8' \
   -H 'content-type: application/json; charset=utf-8' \
-  -H 'cookie: aws_lang=en; AMCVS_7742037254C95E840A4C98A6%40AdobeOrg=1; aws-target-data=%7B%22support%22%3A%221%22%7D; s_campaign=ps%7Cc4f45c53-585c-4b31-8fbf-d39fbcdc603a; regStatus=pre-register; s_cc=true; aws-target-visitor-id=1679922614305-82010.38_0; aws-mkto-trk=id%3A112-TZM-766%26token%3A_mch-aws.amazon.com-1679922614763-92346; s_eVar60=c4f45c53-585c-4b31-8fbf-d39fbcdc603a; s_sq=%5B%5BB%5D%5D; AMCV_7742037254C95E840A4C98A6%40AdobeOrg=1585540135%7CMCIDTS%7C19466%7CMCMID%7C61788696257851363924399646559873529888%7CMCAAMLH-1682433225%7C3%7CMCAAMB-1682433225%7CRKhpRz8krg2tLO6pguXWp5olkAcUniQYPHaMWWgdJ3xzPWQmdj0y%7CMCOPTOUT-1681835625s%7CNONE%7CMCAID%7CNONE%7CvVersion%7C4.4.0; skin=noskin; session-id=135-8866053-8439938; session-id-time=2082787201l; i18n-prefs=USD; sp-cdn="L5Z9:SG"; ubid-main=133-9548421-2436419; session-token=xYX+TbhACnKhHG5AG8UY+XAiK1iW28xZTXItvSavFyvY6sC/9wx1UXHMorjgCzkMhGpalpD8+yqftKckGaDrLx2cDDcgrTOQf+8MshScwQd2biy/kM28gSktXpW+LAfu7qisfvnXQ4elbiF94lMmps/k1AqSIRBpgBXriZ/7PVqnAgL3hXV5AwCvRtkFZPcbtgEJEDuRo9tIOV9ZQEm9LurGqS4/jPtL9mZjoFr+RZ9F47Rq/ApL117kC+/U19PO2xYSWxzKVRhBRKfu62WNFCFwdp8AIF7rVsWwNiDEGa1FlnJ0TN3eEb/S5N1+ZrZ1dBlLg45labYK4GXk0RLjNOCG3/XVcqph; csm-hit=s-QHPTH08449HKY1ZKXQEB|1694617206077' \
+  -H 'cookie: aws_lang=en; AMCVS_7742037254C95E840A4C98A6%40AdobeOrg=1; aws-target-data=%7B%22support%22%3A%221%22%7D; s_campaign=ps%7Cc4f45c53-585c-4b31-8fbf-d39fbcdc603a; regStatus=pre-register; s_cc=true; aws-target-visitor-id=1679922614305-82010.38_0; aws-mkto-trk=id%3A112-TZM-766%26token%3A_mch-aws.amazon.com-1679922614763-92346; s_eVar60=c4f45c53-585c-4b31-8fbf-d39fbcdc603a; s_sq=%5B%5BB%5D%5D; AMCV_7742037254C95E840A4C98A6%40AdobeOrg=1585540135%7CMCIDTS%7C19466%7CMCMID%7C61788696257851363924399646559873529888%7CMCAAMLH-1682433225%7C3%7CMCAAMB-1682433225%7CRKhpRz8krg2tLO6pguXWp5olkAcUniQYPHaMWWgdJ3xzPWQmdj0y%7CMCOPTOUT-1681835625s%7CNONE%7CMCAID%7CNONE%7CvVersion%7C4.4.0; skin=noskin; session-id=135-8866053-8439938; session-id-time=2082787201l; i18n-prefs=USD; sp-cdn="L5Z9:SG"; ubid-main=133-9548421-2436419; session-token=JoKdDTOux8nUy2PFnPWI1RwPrEY9c6Q/EKarOSdSwniuSbTkr1v4hx/D6mcGN6yiT6wxyS21PPVppf8v5sRYud22FoWNqF+KxrI3FQ9FJmxid/J1s+xGgHnjXvt/1ihnXrctLKcE0TL942qzkaJFtu5wXgoXQMF4vy3QR8PHYUNOzF+IFF9GU9H8MWwrB0lk1tkZi2h6KLEOY57tSumSw8QIYDzBdVnIVPeXZCIC5M5/Of7N/nfNb2YBZWJglajqc1TJMw3QMa9PRQJPc8wYp+cpL9ylO8xq+SDBuexLYYaqSjxOH8WPVNF+fcJSflMmeySPy36WiTerR0va6uUucfBu/tqWkVx1; csm-hit=s-0D48A5Q0R1S0W90HKYVW|1695471705392' \
   -H 'device-memory: 8' \
-  -H 'downlink: 10' \
+  -H 'downlink: 1.55' \
   -H 'dpr: 2' \
-  -H 'ect: 4g' \
-  -H 'referer: https://www.amazon.com/s?k=test&ref=nav_bb_sb' \
-  -H 'rtt: 50' \
+  -H 'ect: 3g' \
+  -H 'referer: https://www.amazon.com/s?k=apple&crid=3FC44DJHPX850&sprefix=appl%2Caps%2C416&ref=nb_sb_noss_2' \
+  -H 'rtt: 400' \
   -H 'sec-ch-device-memory: 8' \
   -H 'sec-ch-dpr: 2' \
   -H 'sec-ch-ua: "Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"' \
