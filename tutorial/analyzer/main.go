@@ -153,7 +153,7 @@ func analyze() {
 
 func analyzeFile() {
 	res := Curl{}
-	fileContent, _ := os.ReadFile("post_shopping.curl")
+	fileContent, _ := os.ReadFile("shopping.curl")
 	cmdParts, err := sw.Parse(string(fileContent))
 	if err != nil {
 		fmt.Println(err.Error())

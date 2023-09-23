@@ -25,9 +25,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case filemanager.AnalyzeMsg:
 		data := msg.Content
-		curl, _ := m.analyze(data)
-		// TODO: send analyzed cmd with curl obj
-		_ = curl
+		curl, err := m.analyze(data)
+		if err != nil {
+			return m, Error(AnalyzeError, err.Error())
+		}
+		return m, Success(AnalyzeSuccess, AnalyzeSuccessData{&curl})
 	}
 	return m, nil
 }
@@ -36,12 +38,11 @@ func (m Model) View() string {
 	return ""
 }
 
-func (m Model) analyze(data string) (Curl, tea.Cmd) {
+func (m Model) analyze(data string) (Curl, error) {
 	res := Curl{Rawcurl: data}
 	cmdParts, err := sw.Parse(data)
 	if err != nil {
-		// TODO: send error msg
-		return res, nil
+		return res, err
 	}
 	for i, str := range cmdParts {
 		cmdParts[i] = strings.TrimSpace(str)
