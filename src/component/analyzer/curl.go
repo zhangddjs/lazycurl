@@ -1,19 +1,10 @@
-package main
+package analyzer
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
-
-	flags "github.com/jessevdk/go-flags"
-	sw "github.com/mattn/go-shellwords"
 )
-
-func main() {
-	analyzeFile()
-	// analyze()
-}
 
 type Curl struct {
 	// most used options
@@ -130,55 +121,4 @@ func (c Curl) BuildCurlCmd() string {
 	}
 
 	return res.String()
-}
-
-func analyze() {
-	s := "curl -LIOvk4 --http1.0 -X POST -# --progress-bar -F \"test.file\" -F \"aaa.file\" -u root:123 -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}' https://example.com/api"
-	cmdParts, err := sw.Parse(s)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	res := Curl{}
-	args, _ := flags.ParseArgs(&res, cmdParts)
-	if len(args) > 1 {
-		res.Url = args[1]
-	}
-	// fmt.Println("Curl:", res)
-	// fmt.Println("arg:", args)
-
-	cmdstr := res.BuildCurlCmd()
-	fmt.Println(cmdstr)
-}
-
-func analyzeFile() {
-	res := Curl{}
-	fileContent, _ := os.ReadFile("post_shopping.curl")
-	cmdParts, err := sw.Parse(string(fileContent))
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	for i, str := range cmdParts {
-		cmdParts[i] = strings.TrimSpace(str)
-	}
-	args, err := flags.ParseArgs(&res, cmdParts)
-	if len(args) > 1 {
-		res.Url = args[1]
-	}
-	// fmt.Println("curl:", cmdParts)
-	// fmt.Println("headers:", res.Header[0])
-	cmdstr := res.BuildCurlCmd()
-	//fmt.Println("arg:", args)
-
-	for i := 0; i < 10; i++ {
-		cmdParts, _ := sw.Parse(cmdstr)
-		args, _ := flags.ParseArgs(&res, cmdParts)
-		if len(args) > 1 {
-			res.Url = args[1]
-		}
-		cmdstr = res.BuildCurlCmd()
-	}
-
-	fmt.Println(cmdstr)
 }
