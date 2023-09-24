@@ -1,30 +1,29 @@
-package analyzer
+package filemanager
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	flags "github.com/jessevdk/go-flags"
 	sw "github.com/mattn/go-shellwords"
-	"github.com/zhangddjs/lazycurl/component/filemanager"
 	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 	"strings"
 )
 
-type Model struct {
-	Curls map[*model.FileNode]Curl
+type AnalyzerModel struct {
+	Curls map[*model.FileNode]model.Curl
 }
 
-func New() Model {
-	return Model{Curls: make(map[*model.FileNode]Curl)}
+func NewAnalyzer() AnalyzerModel {
+	return AnalyzerModel{Curls: make(map[*model.FileNode]model.Curl)}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m AnalyzerModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m AnalyzerModel) Update(msg tea.Msg) (AnalyzerModel, tea.Cmd) {
 	switch msg := msg.(type) {
-	case filemanager.AnalyzeMsg:
-		data := msg.Content
+	case AnalyzeMsg:
+		data := msg.Item.Buffer
 		curl, err := m.analyze(data)
 		if err != nil {
 			return m, Error(AnalyzeError, err.Error())
@@ -34,12 +33,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) View() string {
+func (m AnalyzerModel) View() string {
 	return ""
 }
 
-func (m Model) analyze(data string) (Curl, error) {
-	res := Curl{Rawcurl: data}
+func (m AnalyzerModel) analyze(data string) (model.Curl, error) {
+	res := model.Curl{Rawcurl: data}
 	cmdParts, err := sw.Parse(data)
 	if err != nil {
 		return res, err

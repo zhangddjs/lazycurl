@@ -68,46 +68,14 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
-		case "tab":
-			m.SwitchToNextModel()
-			// TODO: case "s" save buffer to file
-		}
-		switch m.state {
-		// update whichever model is focused
-		case fmView:
-			m.filemanager, cmd = m.filemanager.Update(msg)
-			cmds = append(cmds, cmd)
-		case bmView:
-			m.bufmanager, cmd = m.bufmanager.Update(msg)
-			cmds = append(cmds, cmd)
-		case urlView:
-			m.url, cmd = m.url.Update(msg)
-			cmds = append(cmds, cmd)
-		case methodView:
-			m.method, cmd = m.method.Update(msg)
-			cmds = append(cmds, cmd)
-		case reqBodyView:
-			m.reqBody, cmd = m.reqBody.Update(msg)
-			cmds = append(cmds, cmd)
-		case respBodyView:
-			m.respBody, cmd = m.respBody.Update(msg)
-			cmds = append(cmds, cmd)
-		}
+		cmd = m.handleKey(msg)
+		return m, cmd
 	case tea.WindowSizeMsg:
-		m.url, cmd = m.url.Update(msg)
-		cmds = append(cmds, cmd)
-		m.respBody, cmd = m.respBody.Update(msg)
-		cmds = append(cmds, cmd)
+		cmd = m.handleWindowSize(msg)
+		return m, cmd
 	case filemanager.SuccessMsg:
-		// TODO: switch  success type
-		m.respBody.SetContent(m.filemanager.GetCurItem().GetOriginContent())
-		m.bufmanager, cmd = m.bufmanager.Update(msg)
-		cmds = append(cmds, cmd)
-		//m.respBody, cmd = m.respBody.Update(msg)
-		//cmds = append(cmds, cmd)
+		cmd = m.handleFmSuccess(msg)
+		return m, cmd
 	}
 
 	return m, tea.Batch(cmds...)
@@ -132,6 +100,64 @@ func (m mainModel) View() string {
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fmField, txtArea))
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
 	return s.String()
+}
+
+func (m *mainModel) handleKey(msg tea.KeyMsg) tea.Cmd {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+	switch msg.String() {
+	case "ctrl+c":
+		return tea.Quit
+	case "tab":
+		m.SwitchToNextModel()
+	}
+	switch m.state {
+	// update whichever model is focused
+	case fmView:
+		m.filemanager, cmd = m.filemanager.Update(msg)
+		cmds = append(cmds, cmd)
+	case bmView:
+		m.bufmanager, cmd = m.bufmanager.Update(msg)
+		cmds = append(cmds, cmd)
+	case urlView:
+		m.url, cmd = m.url.Update(msg)
+		cmds = append(cmds, cmd)
+	case methodView:
+		m.method, cmd = m.method.Update(msg)
+		cmds = append(cmds, cmd)
+	case reqBodyView:
+		m.reqBody, cmd = m.reqBody.Update(msg)
+		cmds = append(cmds, cmd)
+	case respBodyView:
+		m.respBody, cmd = m.respBody.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+	return tea.Batch(cmds...)
+}
+
+func (m *mainModel) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+	m.url, cmd = m.url.Update(msg)
+	cmds = append(cmds, cmd)
+	m.respBody, cmd = m.respBody.Update(msg)
+	cmds = append(cmds, cmd)
+	return tea.Batch(cmds...)
+}
+
+// handleFmSuccess
+// 1.ReadFileSuccess -- buff, analyzer
+func (m *mainModel) handleFmSuccess(msg fm.SuccessMsg) tea.Cmd {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+	switch msg.Type {
+	case fm.ReadFileSuccess:
+		data := msg.Data.(fm.ReadFileSuccessData)
+		m.respBody.SetContent(m.filemanager.GetCurItem().GetOriginContent()) //just for test, need remove
+		m.bufmanager, cmd = m.bufmanager.Update(msg)
+		cmds = append(cmds, cmd, fm.Analyze(data.Item))
+	}
+	return tea.Batch(cmds...)
 }
 
 func (m mainModel) currentFocusedModel() string {

@@ -36,6 +36,94 @@ func New() Model {
 	return model
 }
 
+func (m Model) Init() tea.Cmd {
+	return nil
+}
+
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		cmd := m.handleKey(msg)
+		return m, cmd
+	}
+	return m, nil
+}
+
+func (m Model) View() string {
+	var view strings.Builder
+
+	// view.WriteString("Root Directory: " + m.BasePath + "\n\n")
+
+	for i, item := range m.Items {
+		if i == m.Cursor {
+			view.WriteString("> ")
+		} else {
+			view.WriteString("  ")
+		}
+		indent := strings.Repeat("  ", item.GetLevel())
+		view.WriteString(indent)
+		if item.IsDir() {
+			if m.isDirExpanded(item) {
+				view.WriteString("- ")
+			} else {
+				view.WriteString("+ ")
+			}
+		} else {
+			view.WriteString("* ")
+		}
+		view.WriteString(item.GetName())
+		if item.IsDir() {
+			view.WriteString("/")
+		}
+		view.WriteString("\n")
+	}
+
+	return view.String()
+}
+
+func (m Model) Render(isActive bool) string {
+	if isActive {
+		return styles.FocusedFileManagerStyle.Render(m.View())
+	}
+	return styles.FileManagerStyle.Render(m.View())
+}
+
+func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
+	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit
+	case "up", "k":
+		if m.Cursor > 0 {
+			m.Cursor--
+		}
+	case "down", "j":
+		if m.Cursor < len(m.Items)-1 {
+			m.Cursor++
+		}
+	case "enter":
+		item := m.GetCurItem()
+		if item.IsDir() {
+			if m.isDirExpanded(item) {
+				m.foldSubFiles(item)
+			} else {
+				m.ExpandedDirItems[item] = m.loadSubFiles(item)
+			}
+		} else if item.IsCurl() {
+			// TODO:implement
+			// 1. load file
+			// 2. analyze file into request method, params, body, header...
+			// 3. if return err then show pop up
+			// 4. return cmd to refresh the text area of Request infomation
+			err := m.readFile()
+			if err != nil {
+				return Error(ReadFileError, err.Error())
+			}
+			return Success(ReadFileSuccess, ReadFileSuccessData{item})
+		}
+	}
+	return nil
+}
+
 func (m *Model) loadRootFiles() []*model.FileNode {
 	m.Items = make([]*model.FileNode, 0)
 	path := m.BasePath
@@ -153,94 +241,6 @@ func (m *Model) readFile() error {
 	// TODO: BufferManager append this item to buffer list
 
 	return nil
-}
-
-func (m Model) Init() tea.Cmd {
-	return nil
-}
-
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "up", "k":
-			if m.Cursor > 0 {
-				m.Cursor--
-			}
-
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
-			if m.Cursor < len(m.Items)-1 {
-				m.Cursor++
-			}
-
-		case "enter":
-			item := m.GetCurItem()
-			if item.IsDir() {
-				if m.isDirExpanded(item) {
-					m.foldSubFiles(item)
-				} else {
-					m.ExpandedDirItems[item] = m.loadSubFiles(item)
-				}
-			} else if item.IsCurl() {
-				// TODO:implement
-				// 1. load file
-				// 2. analyze file into request method, params, body, header...
-				// 3. if return err then show pop up
-				// 4. return cmd to refresh the text area of Request infomation
-				err := m.readFile()
-				if err != nil {
-					return m, Error(ReadFileError, err.Error())
-				}
-				return m, Success(ReadFileSuccess, ReadFileSuccessData{item})
-			}
-
-		}
-		// Handle keyboard input for navigation and interaction
-		// Implement file movement and editing logic here
-	}
-	return m, nil
-}
-
-func (m Model) View() string {
-	var view strings.Builder
-
-	// view.WriteString("Root Directory: " + m.BasePath + "\n\n")
-
-	for i, item := range m.Items {
-		if i == m.Cursor {
-			view.WriteString("> ")
-		} else {
-			view.WriteString("  ")
-		}
-		indent := strings.Repeat("  ", item.GetLevel())
-		view.WriteString(indent)
-		if item.IsDir() {
-			if m.isDirExpanded(item) {
-				view.WriteString("- ")
-			} else {
-				view.WriteString("+ ")
-			}
-		} else {
-			view.WriteString("* ")
-		}
-		view.WriteString(item.GetName())
-		if item.IsDir() {
-			view.WriteString("/")
-		}
-		view.WriteString("\n")
-	}
-
-	return view.String()
-}
-
-func (m Model) Render(isActive bool) string {
-	if isActive {
-		return styles.FocusedFileManagerStyle.Render(m.View())
-	}
-	return styles.FileManagerStyle.Render(m.View())
 }
 
 // TODO:load the file from pwd

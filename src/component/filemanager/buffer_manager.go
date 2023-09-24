@@ -9,13 +9,12 @@ import (
 )
 
 type BufModel struct {
-	Items       []*model.FileNode
-	Cursor      int
-	ExistingBuf map[*model.FileNode]bool
+	Items  []*model.FileNode
+	Cursor int
 }
 
 func NewBM() BufModel {
-	return BufModel{ExistingBuf: make(map[*model.FileNode]bool)}
+	return BufModel{}
 }
 
 func (m BufModel) Init() tea.Cmd {
@@ -25,36 +24,11 @@ func (m BufModel) Init() tea.Cmd {
 func (m BufModel) Update(msg tea.Msg) (BufModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "up", "k":
-			if m.Cursor > 0 {
-				m.Cursor--
-			}
-
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
-			if m.Cursor < len(m.Items)-1 {
-				m.Cursor++
-			}
-
-		case "enter":
-			item := m.GetCurItem()
-			// TODO: send analyze Cmd
-			_ = item
-
-		}
-		// Handle keyboard input for navigation and interaction
-		// Implement file movement and editing logic here
+		cmd := m.handleKey(msg)
+		return m, cmd
 	case SuccessMsg:
-		if msg.Type == ReadFileSuccess {
-			data := msg.data.(ReadFileSuccessData)
-			if !m.ExistingBuf[data.Item] {
-				m.ExistingBuf[data.Item] = true
-				m.Items = append(m.Items, data.Item)
-			}
-		}
+		cmd := m.handleFmSuccess(msg)
+		return m, cmd
 	}
 	return m, nil
 }
@@ -87,9 +61,60 @@ func (m BufModel) Render(isActive bool) string {
 	return styles.FileManagerStyle.Render(m.View())
 }
 
+// GetCurItem get current file item
 func (m BufModel) GetCurItem() *model.FileNode {
 	if m.Cursor < 0 || m.Cursor >= len(m.Items) {
 		return nil
 	}
 	return m.Items[m.Cursor]
+}
+
+// TODO:
+// 1.delete Buffer
+// 2. import buffer
+// 3. save buffer
+func (m *BufModel) handleKey(msg tea.KeyMsg) tea.Cmd {
+	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit
+	case "up", "k":
+		if m.Cursor > 0 {
+			m.Cursor--
+		}
+	case "down", "j":
+		if m.Cursor < len(m.Items)-1 {
+			m.Cursor++
+		}
+	case "enter":
+		item := m.GetCurItem()
+		if item == nil {
+			return nil
+		}
+		return Success(OpenBufferSuccess, OpenBufferSuccessData{item})
+	}
+	// Handle keyboard input for navigation and interaction
+	// Implement file movement and editing logic here
+	return nil
+}
+
+// handleFmSuccess
+//  1. refresh cursor after user read a file
+//  2. append buffer if not exist after user read a file
+func (m *BufModel) handleFmSuccess(msg SuccessMsg) tea.Cmd {
+	switch msg.Type {
+	case ReadFileSuccess:
+		data := msg.Data.(ReadFileSuccessData)
+		exist := false
+		for i, item := range m.Items {
+			if data.Item == item {
+				m.Cursor = i
+				exist = true
+			}
+		}
+		if !exist {
+			m.Items = append(m.Items, data.Item)
+			m.Cursor = len(m.Items) - 1
+		}
+	}
+	return nil
 }

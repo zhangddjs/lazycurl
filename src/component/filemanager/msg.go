@@ -15,6 +15,8 @@ const (
 	SaveFileSuccess
 	ReadFileSuccess
 	CreateFileSuccess
+	OpenBufferSuccess
+	AnalyzeSuccess
 )
 
 const (
@@ -22,15 +24,24 @@ const (
 	SaveFileError
 	ReadFileError
 	CreateFileError
+	AnalyzeError
 )
 
 type ReadFileSuccessData struct {
 	Item *model.FileNode
 }
 
+type OpenBufferSuccessData struct {
+	Item *model.FileNode
+}
+
+type AnalyzeSuccessData struct {
+	Curl *model.Curl
+}
+
 type SuccessMsg struct {
 	Type successType
-	data interface{}
+	Data interface{}
 }
 
 type ErrorMsg struct {
@@ -39,7 +50,7 @@ type ErrorMsg struct {
 }
 
 type AnalyzeMsg struct {
-	Content string
+	Item *model.FileNode
 }
 
 func Success(t successType, data interface{}) tea.Cmd {
@@ -54,8 +65,8 @@ func Error(t errorType, msg string) tea.Cmd {
 	}
 }
 
-func Analyze(content string) tea.Cmd {
+func Analyze(item *model.FileNode) tea.Cmd {
 	return func() tea.Msg {
-		return AnalyzeMsg{content}
+		return AnalyzeMsg{item}
 	}
 }
