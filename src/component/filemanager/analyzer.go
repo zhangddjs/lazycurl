@@ -9,11 +9,10 @@ import (
 )
 
 type AnalyzerModel struct {
-	Curls map[*model.FileNode]model.Curl
 }
 
 func NewAnalyzer() AnalyzerModel {
-	return AnalyzerModel{Curls: make(map[*model.FileNode]model.Curl)}
+	return AnalyzerModel{}
 }
 
 func (m AnalyzerModel) Init() tea.Cmd {
@@ -23,18 +22,23 @@ func (m AnalyzerModel) Init() tea.Cmd {
 func (m AnalyzerModel) Update(msg tea.Msg) (AnalyzerModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case AnalyzeMsg:
-		data := msg.Item.Buffer
-		curl, err := m.analyze(data)
-		if err != nil {
-			return m, Error(AnalyzeError, err.Error())
-		}
-		return m, Success(AnalyzeSuccess, AnalyzeSuccessData{&curl})
+		cmd := m.handleAnalyze(msg)
+		return m, cmd
 	}
 	return m, nil
 }
 
 func (m AnalyzerModel) View() string {
 	return ""
+}
+
+func (m *AnalyzerModel) handleAnalyze(msg AnalyzeMsg) tea.Cmd {
+	data := msg.Item.GetBuffer()
+	curl, err := m.analyze(data)
+	if err != nil {
+		return Error(AnalyzeError, err.Error())
+	}
+	return Success(AnalyzeSuccess, AnalyzeSuccessData{&curl})
 }
 
 func (m AnalyzerModel) analyze(data string) (model.Curl, error) {
@@ -48,7 +52,7 @@ func (m AnalyzerModel) analyze(data string) (model.Curl, error) {
 	}
 	args, _ := flags.ParseArgs(&res, cmdParts)
 	// args[0] normally be 'curl'
-	if len(args) > 1 && args[1] != "" && res.Url != "" {
+	if len(args) > 1 && args[1] != "" && res.Url == "" {
 		res.Url = args[1]
 	}
 	return res, nil

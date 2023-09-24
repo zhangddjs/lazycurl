@@ -114,9 +114,11 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 			// 2. analyze file into request method, params, body, header...
 			// 3. if return err then show pop up
 			// 4. return cmd to refresh the text area of Request infomation
-			err := m.readFile()
-			if err != nil {
-				return Error(ReadFileError, err.Error())
+			if item.GetBuffer() == "" { // TODO: maybe need better judge way
+				err := m.readFile()
+				if err != nil {
+					return Error(ReadFileError, err.Error())
+				}
 			}
 			return Success(ReadFileSuccess, ReadFileSuccessData{item})
 		}

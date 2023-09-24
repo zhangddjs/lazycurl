@@ -65,6 +65,34 @@ type Curl struct {
 	Rawcurl             string
 }
 
+func (c *Curl) GetHeader() []string {
+	if c == nil {
+		return make([]string, 0)
+	}
+	return c.Header
+}
+
+func (c *Curl) GetMethod() string {
+	if c == nil {
+		return ""
+	}
+	return c.Method
+}
+
+func (c *Curl) SetMethod(m string) {
+	if c == nil {
+		return
+	}
+	c.Method = m
+}
+
+func (c *Curl) GetUrl() string {
+	if c == nil {
+		return ""
+	}
+	return c.Url
+}
+
 func (c Curl) BuildCurlCmd() string {
 	cmdParts := make([]string, 0)
 	boolParts := make([]string, 0)

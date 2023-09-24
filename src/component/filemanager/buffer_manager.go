@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 	"github.com/zhangddjs/lazycurl/styles"
 )
@@ -35,6 +36,7 @@ func (m BufModel) Update(msg tea.Msg) (BufModel, tea.Cmd) {
 
 func (m BufModel) View() string {
 	var view strings.Builder
+	updateStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(styles.ORANGE))
 
 	for i, item := range m.Items {
 		if i == m.Cursor {
@@ -42,12 +44,14 @@ func (m BufModel) View() string {
 		} else {
 			view.WriteString("  ")
 		}
+		// TODO: for imported buffer need a 'N'
 		if item.Buffer != item.OriginContent {
-			view.WriteString("U ")
+			view.WriteString(updateStyle.Render("U "))
+			view.WriteString(updateStyle.Render(item.GetName()))
 		} else {
 			view.WriteString("  ")
+			view.WriteString(item.GetName())
 		}
-		view.WriteString(item.GetName())
 		view.WriteString("\n")
 	}
 

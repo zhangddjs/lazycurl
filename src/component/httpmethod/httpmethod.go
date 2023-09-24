@@ -19,11 +19,18 @@ var methodStr = [...]string{
 	"GET", "POST", "PUT", "DELETE",
 }
 
+var strToMethod = map[string]Method{
+	"GET":    GET,
+	"POST":   POST,
+	"PUT":    PUT,
+	"DELETE": DELETE,
+}
+
 var methodColor = map[Method]string{
-	GET:    "#32CD32", //Green
-	POST:   "#FFFF00", //yellow
-	PUT:    "#1E90FF", //Blue
-	DELETE: "#FF0000", //Red
+	GET:    styles.GREEN,
+	POST:   styles.YELLOW,
+	PUT:    styles.BLUE,
+	DELETE: styles.RED,
 }
 
 func (m Method) String() string {
@@ -53,17 +60,15 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, tea.Quit
 		case "n":
 			m.SwitchToNextMethod()
-			// TODO: implement cmd to update raw file
-			return m, nil
+			return m, SwitchMethod(m.method)
 		}
-		// TODO: case open file, read the method
 	}
 	return m, nil
 }
 
 func (m Model) View() string {
 	helpStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(methodColor[m.method]))
-	return helpStyle.Render(m.method.String())
+	return helpStyle.Render(m.GetMethod())
 }
 
 func (m Model) Render(isActive bool) string {
@@ -73,6 +78,28 @@ func (m Model) Render(isActive bool) string {
 			Render()
 	}
 	return styles.MethodStyle.SetString(m.View()).Render()
+}
+
+func (m *Model) GetMethodColor() string {
+	if m == nil {
+		return ""
+	}
+	return methodColor[m.method]
+}
+
+func (m *Model) GetMethod() string {
+	if m == nil {
+		return ""
+	}
+	return m.method.String()
+}
+
+func (m *Model) SetMethod(s string) {
+	if method, ok := strToMethod[s]; ok {
+		m.method = method
+	} else {
+		m.method = GET
+	}
 }
 
 func (m *Model) SwitchToNextMethod() {
