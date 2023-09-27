@@ -10,7 +10,7 @@ import (
 	fm "github.com/zhangddjs/lazycurl/component/filemanager"
 	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 	hm "github.com/zhangddjs/lazycurl/component/httpmethod"
-	ta "github.com/zhangddjs/lazycurl/component/textarea"
+	rq "github.com/zhangddjs/lazycurl/component/request"
 	vp "github.com/zhangddjs/lazycurl/component/viewport"
 	"github.com/zhangddjs/lazycurl/styles"
 )
@@ -27,12 +27,12 @@ const (
 	bmView
 	methodView
 	urlView
-	reqBodyView
+	reqHeaderView
 	respBodyView
 )
 
 const (
-	MODEL_CNT   = 5
+	MODEL_CNT   = 6
 	defaultTime = time.Minute
 )
 
@@ -40,7 +40,7 @@ type mainModel struct {
 	state          sessionState
 	method         hm.Model
 	url            vp.Model
-	reqBody        ta.Model //TODO: seems this things need to use normal mode instead edit mode
+	reqHeader      rq.HeaderModel
 	respBody       vp.Model
 	filemanager    fm.Model
 	bufmanager     fm.BufModel
@@ -56,7 +56,7 @@ func NewModel(timeout time.Duration) mainModel {
 	m.bufmanager = fm.NewBM()
 	m.analyzer = fm.NewAnalyzer()
 	m.url = vp.New(styles.UrlW, styles.UrlH, "https://www.youtube.com/watch?v=\n_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi")
-	m.reqBody = ta.New(styles.ReqBodyW-2, styles.ReqBodyH)
+	m.reqHeader = rq.NewHeaderModel(styles.ReqBodyW, styles.ReqBodyH)
 	m.respBody = vp.New(styles.RespBodyW, styles.RespBodyH, "{\n\taaa:bbb\n}")
 	return m
 }
@@ -100,13 +100,13 @@ func (m mainModel) View() string {
 	logo := styles.LogoStyle.Render()
 	method := m.method.Render(m.isActive(methodView))
 	url := m.url.RenderUrl(m.isActive(urlView))
-	reqBody := m.reqBody.RenderReqBody(m.isActive(reqBodyView))
+	reqHeader := m.reqHeader.Render(m.isActive(reqHeaderView))
 	respBody := m.respBody.RenderRespBody(m.isActive(respBodyView))
 
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, logo, method, url))
 	s.WriteString("\n")
 	fmField := lipgloss.JoinVertical(lipgloss.Left, fm, bm)
-	txtArea := lipgloss.JoinVertical(lipgloss.Left, reqBody, respBody)
+	txtArea := lipgloss.JoinVertical(lipgloss.Left, reqHeader, respBody)
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fmField, txtArea))
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
 	return s.String()
@@ -136,8 +136,8 @@ func (m *mainModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 	case methodView:
 		m.method, cmd = m.method.Update(msg)
 		cmds = append(cmds, cmd)
-	case reqBodyView:
-		m.reqBody, cmd = m.reqBody.Update(msg)
+	case reqHeaderView:
+		m.reqHeader, cmd = m.reqHeader.Update(msg)
 		cmds = append(cmds, cmd)
 	case respBodyView:
 		m.respBody, cmd = m.respBody.Update(msg)
@@ -150,6 +150,8 @@ func (m *mainModel) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 	m.url, cmd = m.url.Update(msg)
+	cmds = append(cmds, cmd)
+	m.reqHeader, cmd = m.reqHeader.Update(msg)
 	cmds = append(cmds, cmd)
 	m.respBody, cmd = m.respBody.Update(msg)
 	cmds = append(cmds, cmd)
@@ -177,6 +179,7 @@ func (m *mainModel) handleFmSuccess(msg fm.SuccessMsg) tea.Cmd {
 		m.activeCurl = data.Curl
 		m.method.SetMethod(strings.ToUpper(data.Curl.GetMethod()))
 		m.url.SetContent(data.Curl.GetUrl())
+		m.reqHeader.SetHeader(data.Curl.GetHeader())
 		m.respBody.SetContent(strings.Join(data.Curl.GetHeader(), "\n")) //just for test, need remove
 		// TODO: render
 	}
