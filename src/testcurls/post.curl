@@ -1,0 +1,120 @@
+curl 'http://fiddle.jshell.net/echo/html/' \
+    -H 'Origin: http://fiddle.jshell.net' \
+    -H 'Accept-Encoding: gzip, deflate' \
+    -H 'Accept-Language: en-US,en;q=0.8' \
+    -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36' \
+    -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+    -H 'Accept: */*' \
+    -H 'Referer: http://fiddle.jshell.net/_display/' \
+    -H 'X-Requested-With: XMLHttpRequest' \
+    -H 'Connection: keep-alive' \
+    --data '{
+    "Context": {
+        "cookies": {
+            "session": "session-id",
+            "recognition": "x-main",
+            "locale": "lc-main",
+            "ubid": "ubid-main"
+        }
+    },
+    "ShoppingAidsList": {
+        "MultiPageShoppingAids": {
+            "data": {},
+            "priorityList": []
+        },
+        "Hotspots": {
+            "data": {
+                "s-pinch-to-zoom-hotspot-tooltip-NA": {
+                    "positionY": -5,
+                    "identifier": "s-pinch-to-zoom-hotspot-tooltip-NA",
+                    "sequenceNum": 0,
+                    "elementDisplayType": "HTML",
+                    "maxDisplayCount": 5,
+                    "pulsatingIteration": 6,
+                    "hotspotAnchor": "#s-pinch-to-zoom-hotspot-tooltip",
+                    "weblabTriggerOnlyFlag": false,
+                    "nestedSAPriorityList": [
+                        {
+                            "identifier": "s-search-pinch-to-zoom-hotspot-video-tooltip-text-NA",
+                            "pageType": "search",
+                            "SAType": "ToolTips"
+                        }
+                    ],
+                    "impressionInterval": 5,
+                    "positionX": 5
+                }
+            },
+            "priorityList": [
+                "s-pinch-to-zoom-hotspot-tooltip-NA"
+            ]
+        },
+        "Sparkles": {
+            "data": {},
+            "priorityList": []
+        },
+        "Audiospots": {
+            "data": {},
+            "priorityList": []
+        },
+        "ToolTips": {
+            "data": {
+                "a9vs_morelikethis_tooltip": {
+                    "identifier": "a9vs_morelikethis_tooltip",
+                    "sequenceNum": 3,
+                    "tipType": "tool_tip",
+                    "elementBackgroundColor": "#FFA724",
+                    "elementBorderColor": "#FFA724",
+                    "weblabTriggerOnlyFlag": false,
+                    "elementWidth": 390,
+                    "elementArrowPosition": "topleft",
+                    "lastImpressionTime": 1695471711901,
+                    "elementTextColor": "#000000",
+                    "impressionInterval": 24,
+                    "elementAnchor": ".mlt-icon-container",
+                    "clientSideTargetting": "html .mlt-icon-container visible",
+                    "elementDuration": 3000,
+                    "elementBounceDuration": 9000,
+                    "elementStartOffset": 1,
+                    "highlighter": false,
+                    "elementDisplayType": "HTML",
+                    "userState": "ANY",
+                    "maxDisplayCount": 3,
+                    "elementHeight": 80,
+                    "scrollToAnchor": false,
+                    "elementValue": "See more like this",
+                    "elementType": "TEXT"
+                },
+                "s-search-pinch-to-zoom-hotspot-video-tooltip-text-NA": {
+                    "identifier": "s-search-pinch-to-zoom-hotspot-video-tooltip-text-NA",
+                    "weblabTriggerOnlyFlag": false,
+                    "elementArrowPosition": "topmiddle",
+                    "type": "tool_tip",
+                    "impressionInterval": 5,
+                    "elementAnchor": "#s-pinch-to-zoom-hotspot-tooltip",
+                    "pageType": "search",
+                    "highlighter": false,
+                    "elementDisplayType": "HTML",
+                    "maxDisplayCount": 5,
+                    "scrollToAnchor": false,
+                    "elementValue": "Pinch images to zoom",
+                    "parentIdentity": {
+                        "identifier": "s-pinch-to-zoom-hotspot-tooltip-NA",
+                        "pageType": "search",
+                        "SAType": "Hotspots"
+                    }
+                }
+            },
+            "priorityList": [
+                "a9vs_morelikethis_tooltip"
+            ]
+        },
+        "SmartHintsXFAB": {
+            "data": {},
+            "priorityList": []
+        },
+        "BottomSheets": {
+            "data": {},
+            "priorityList": []
+        }
+    }
+}' --compressed

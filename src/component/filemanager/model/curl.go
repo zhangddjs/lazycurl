@@ -93,6 +93,13 @@ func (c *Curl) GetUrl() string {
 	return c.Url
 }
 
+func (c *Curl) GetBody() string {
+	if c == nil {
+		return ""
+	}
+	return c.Body
+}
+
 func (c Curl) BuildCurlCmd() string {
 	cmdParts := make([]string, 0)
 	boolParts := make([]string, 0)

@@ -41,6 +41,7 @@ type mainModel struct {
 	method         hm.Model
 	url            vp.Model
 	reqHeader      rq.HeaderModel
+	reqBody        rq.BodyModel
 	respBody       vp.Model
 	filemanager    fm.Model
 	bufmanager     fm.BufModel
@@ -57,6 +58,7 @@ func NewModel(timeout time.Duration) mainModel {
 	m.analyzer = fm.NewAnalyzer()
 	m.url = vp.New(styles.UrlW, styles.UrlH, "https://www.youtube.com/watch?v=\n_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi")
 	m.reqHeader = rq.NewHeaderModel(styles.ReqBodyW, styles.ReqBodyH)
+	m.reqBody = rq.NewBodyModel(styles.ReqBodyW, styles.ReqBodyH)
 	m.respBody = vp.New(styles.RespBodyW, styles.RespBodyH, "{\n\taaa:bbb\n}")
 	return m
 }
@@ -101,12 +103,14 @@ func (m mainModel) View() string {
 	method := m.method.Render(m.isActive(methodView))
 	url := m.url.RenderUrl(m.isActive(urlView))
 	reqHeader := m.reqHeader.Render(m.isActive(reqHeaderView))
+	reqBody := m.reqBody.Render(m.isActive(respBodyView))
 	respBody := m.respBody.RenderRespBody(m.isActive(respBodyView))
+	_ = respBody
 
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, logo, method, url))
 	s.WriteString("\n")
 	fmField := lipgloss.JoinVertical(lipgloss.Left, fm, bm)
-	txtArea := lipgloss.JoinVertical(lipgloss.Left, reqHeader, respBody)
+	txtArea := lipgloss.JoinVertical(lipgloss.Left, reqHeader, reqBody)
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fmField, txtArea))
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
 	return s.String()
@@ -142,6 +146,8 @@ func (m *mainModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 	case respBodyView:
 		m.respBody, cmd = m.respBody.Update(msg)
 		cmds = append(cmds, cmd)
+		m.reqBody, cmd = m.reqBody.Update(msg) // TODO: need remove this
+		cmds = append(cmds, cmd)
 	}
 	return tea.Batch(cmds...)
 }
@@ -154,6 +160,8 @@ func (m *mainModel) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 	m.reqHeader, cmd = m.reqHeader.Update(msg)
 	cmds = append(cmds, cmd)
 	m.respBody, cmd = m.respBody.Update(msg)
+	cmds = append(cmds, cmd)
+	m.reqBody, cmd = m.reqBody.Update(msg) //TODO: need remove this
 	cmds = append(cmds, cmd)
 	return tea.Batch(cmds...)
 }
@@ -180,6 +188,7 @@ func (m *mainModel) handleFmSuccess(msg fm.SuccessMsg) tea.Cmd {
 		m.method.SetMethod(strings.ToUpper(data.Curl.GetMethod()))
 		m.url.SetContent(data.Curl.GetUrl())
 		m.reqHeader.SetHeader(data.Curl.GetHeader())
+		m.reqBody.SetBody(data.Curl.GetBody())
 		m.respBody.SetContent(strings.Join(data.Curl.GetHeader(), "\n")) //just for test, need remove
 		// TODO: render
 	}

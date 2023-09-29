@@ -104,6 +104,7 @@ func (m *HeaderModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 		if m.cursor < len(m.headers)-1 {
 			m.cursor++
 		}
+		// TODO: add page up page down support
 	case "enter":
 		header := m.GetCurHeader()
 		_ = header
