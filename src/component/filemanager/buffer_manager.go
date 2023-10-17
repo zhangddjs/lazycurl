@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/zhangddjs/lazycurl/component/filemanager/model"
+	"github.com/zhangddjs/lazycurl/model"
 	"github.com/zhangddjs/lazycurl/styles"
 )
 
@@ -27,7 +27,7 @@ func (m BufModel) Update(msg tea.Msg) (BufModel, tea.Cmd) {
 	case tea.KeyMsg:
 		cmd := m.handleKey(msg)
 		return m, cmd
-	case SuccessMsg:
+	case model.SuccessMsg:
 		cmd := m.handleFmSuccess(msg)
 		return m, cmd
 	}
@@ -94,7 +94,7 @@ func (m *BufModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 		if item == nil {
 			return nil
 		}
-		return Success(OpenBufferSuccess, OpenBufferSuccessData{item})
+		return model.Success(model.OpenBufferSuccess, model.OpenBufferSuccessData{item})
 	}
 	// Handle keyboard input for navigation and interaction
 	// Implement file movement and editing logic here
@@ -104,10 +104,10 @@ func (m *BufModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 // handleFmSuccess
 //  1. refresh cursor after user read a file
 //  2. append buffer if not exist after user read a file
-func (m *BufModel) handleFmSuccess(msg SuccessMsg) tea.Cmd {
+func (m *BufModel) handleFmSuccess(msg model.SuccessMsg) tea.Cmd {
 	switch msg.Type {
-	case ReadFileSuccess:
-		data := msg.Data.(ReadFileSuccessData)
+	case model.ReadFileSuccess:
+		data := msg.Data.(model.ReadFileSuccessData)
 		exist := false
 		for i, item := range m.Items {
 			if data.Item == item {

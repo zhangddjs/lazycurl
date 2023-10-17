@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/zhangddjs/lazycurl/component/filemanager/model"
+	"github.com/zhangddjs/lazycurl/model"
 	"github.com/zhangddjs/lazycurl/styles"
 )
 
@@ -117,10 +117,10 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 			if item.GetBuffer() == "" { // TODO: maybe need better judge way
 				err := m.readFile()
 				if err != nil {
-					return Error(ReadFileError, err.Error())
+					return model.Error(model.ReadFileError, err.Error())
 				}
 			}
-			return Success(ReadFileSuccess, ReadFileSuccessData{item})
+			return model.Success(model.ReadFileSuccess, model.ReadFileSuccessData{item})
 		}
 	}
 	return nil

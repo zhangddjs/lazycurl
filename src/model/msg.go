@@ -1,8 +1,7 @@
-package filemanager
+package model
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 )
 
 type (
@@ -28,15 +27,15 @@ const (
 )
 
 type ReadFileSuccessData struct {
-	Item *model.FileNode
+	Item *FileNode
 }
 
 type OpenBufferSuccessData struct {
-	Item *model.FileNode
+	Item *FileNode
 }
 
 type AnalyzeSuccessData struct {
-	Curl *model.Curl
+	Curl *Curl
 }
 
 type SuccessMsg struct {
@@ -50,7 +49,7 @@ type ErrorMsg struct {
 }
 
 type AnalyzeMsg struct {
-	Item *model.FileNode
+	Item *FileNode
 }
 
 func Success(t successType, data interface{}) tea.Cmd {
@@ -65,7 +64,7 @@ func Error(t errorType, msg string) tea.Cmd {
 	}
 }
 
-func Analyze(item *model.FileNode) tea.Cmd {
+func Analyze(item *FileNode) tea.Cmd {
 	return func() tea.Msg {
 		return AnalyzeMsg{item}
 	}

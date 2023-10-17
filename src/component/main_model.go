@@ -8,10 +8,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	fm "github.com/zhangddjs/lazycurl/component/filemanager"
-	"github.com/zhangddjs/lazycurl/component/filemanager/model"
 	hm "github.com/zhangddjs/lazycurl/component/httpmethod"
 	rq "github.com/zhangddjs/lazycurl/component/request"
 	vp "github.com/zhangddjs/lazycurl/component/viewport"
+	"github.com/zhangddjs/lazycurl/model"
 	"github.com/zhangddjs/lazycurl/styles"
 )
 
@@ -78,10 +78,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		cmd = m.handleWindowSize(msg)
 		return m, cmd
-	case fm.SuccessMsg:
+	case model.SuccessMsg:
 		cmd = m.handleFmSuccess(msg)
 		return m, cmd
-	case fm.AnalyzeMsg:
+	case model.AnalyzeMsg:
 		cmd = m.handleAnalyze(msg)
 		return m, cmd
 
@@ -168,22 +168,22 @@ func (m *mainModel) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 
 // handleFmSuccess
 // 1.ReadFileSuccess -- buff, analyzer
-func (m *mainModel) handleFmSuccess(msg fm.SuccessMsg) tea.Cmd {
+func (m *mainModel) handleFmSuccess(msg model.SuccessMsg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 	switch msg.Type {
-	case fm.ReadFileSuccess:
-		data := msg.Data.(fm.ReadFileSuccessData)
+	case model.ReadFileSuccess:
+		data := msg.Data.(model.ReadFileSuccessData)
 		m.bufmanager, cmd = m.bufmanager.Update(msg)
 		m.activeFileNode = data.Item
-		cmds = append(cmds, cmd, fm.Analyze(data.Item))
-	case fm.OpenBufferSuccess:
-		data := msg.Data.(fm.OpenBufferSuccessData)
+		cmds = append(cmds, cmd, model.Analyze(data.Item))
+	case model.OpenBufferSuccess:
+		data := msg.Data.(model.OpenBufferSuccessData)
 		m.activeFileNode = data.Item
 		// TODO: need file manager know about this and expand dirs, update his cursor
-		cmds = append(cmds, cmd, fm.Analyze(data.Item))
-	case fm.AnalyzeSuccess:
-		data := msg.Data.(fm.AnalyzeSuccessData)
+		cmds = append(cmds, cmd, model.Analyze(data.Item))
+	case model.AnalyzeSuccess:
+		data := msg.Data.(model.AnalyzeSuccessData)
 		m.activeCurl = data.Curl
 		m.method.SetMethod(strings.ToUpper(data.Curl.GetMethod()))
 		m.url.SetContent(data.Curl.GetUrl())
@@ -195,7 +195,7 @@ func (m *mainModel) handleFmSuccess(msg fm.SuccessMsg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m *mainModel) handleAnalyze(msg fm.AnalyzeMsg) tea.Cmd {
+func (m *mainModel) handleAnalyze(msg model.AnalyzeMsg) tea.Cmd {
 	var cmd tea.Cmd
 	m.analyzer, cmd = m.analyzer.Update(msg)
 	return cmd

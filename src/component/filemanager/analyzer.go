@@ -4,7 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	flags "github.com/jessevdk/go-flags"
 	sw "github.com/mattn/go-shellwords"
-	"github.com/zhangddjs/lazycurl/component/filemanager/model"
+	"github.com/zhangddjs/lazycurl/model"
 	"strings"
 )
 
@@ -21,7 +21,7 @@ func (m AnalyzerModel) Init() tea.Cmd {
 
 func (m AnalyzerModel) Update(msg tea.Msg) (AnalyzerModel, tea.Cmd) {
 	switch msg := msg.(type) {
-	case AnalyzeMsg:
+	case model.AnalyzeMsg:
 		cmd := m.handleAnalyze(msg)
 		return m, cmd
 	}
@@ -32,13 +32,13 @@ func (m AnalyzerModel) View() string {
 	return ""
 }
 
-func (m *AnalyzerModel) handleAnalyze(msg AnalyzeMsg) tea.Cmd {
+func (m *AnalyzerModel) handleAnalyze(msg model.AnalyzeMsg) tea.Cmd {
 	data := msg.Item.GetBuffer()
 	curl, err := m.analyze(data)
 	if err != nil {
-		return Error(AnalyzeError, err.Error())
+		return model.Error(model.AnalyzeError, err.Error())
 	}
-	return Success(AnalyzeSuccess, AnalyzeSuccessData{&curl})
+	return model.Success(model.AnalyzeSuccess, model.AnalyzeSuccessData{&curl})
 }
 
 func (m AnalyzerModel) analyze(data string) (model.Curl, error) {

@@ -1,6 +1,8 @@
 package request
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 type tabState uint
 
