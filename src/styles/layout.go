@@ -125,6 +125,19 @@ var (
 				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(highlight)
+
+	ReqStyle = lipgloss.NewStyle().
+			Width(ReqBodyW).
+			Height(ReqBodyH).
+			Align(lipgloss.Left, lipgloss.Top).
+			BorderStyle(lipgloss.NormalBorder())
+
+	FocusedReqStyle = lipgloss.NewStyle().
+			Width(ReqBodyW).
+			Height(ReqBodyH).
+			Align(lipgloss.Left, lipgloss.Top).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(highlight)
 )
 
 var (

@@ -3,6 +3,7 @@ package request
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/zhangddjs/lazycurl/model"
+	"github.com/zhangddjs/lazycurl/styles"
 )
 
 type tabState uint
@@ -14,7 +15,7 @@ const (
 )
 
 const (
-	MODEL_CNT = 3
+	MODEL_CNT = 2 // TODO: for test set to 2
 )
 
 type Model struct {
@@ -55,8 +56,20 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	// TODO: implement the render by active pane
+	switch m.state {
+	case headerView:
+		return m.header.View()
+	case bodyView:
+		return m.body.View()
+	}
 	return ""
+}
+
+func (m Model) Render(isActive bool) string {
+	if isActive {
+		return styles.FocusedReqStyle.Render(m.View())
+	}
+	return styles.ReqStyle.Render(m.View())
 }
 
 func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
@@ -102,6 +115,7 @@ func (m *Model) handleSuccess(msg model.SuccessMsg) tea.Cmd {
 		data := msg.Data.(model.AnalyzeSuccessData)
 		m.header.SetHeader(data.Curl.GetHeader())
 		m.body.SetBody(data.Curl.GetBody())
+		// TODO: m.rawCurl need update
 	}
 	return cmd
 }

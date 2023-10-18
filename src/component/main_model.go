@@ -27,7 +27,7 @@ const (
 	bmView
 	methodView
 	urlView
-	reqHeaderView
+	reqView
 	respBodyView
 )
 
@@ -40,7 +40,7 @@ type mainModel struct {
 	state          sessionState
 	method         hm.Model
 	url            vp.Model
-	reqHeader      rq.HeaderModel
+	req            rq.Model
 	reqBody        rq.BodyModel
 	respBody       vp.Model
 	filemanager    fm.Model
@@ -57,7 +57,7 @@ func NewModel(timeout time.Duration) mainModel {
 	m.bufmanager = fm.NewBM()
 	m.analyzer = fm.NewAnalyzer()
 	m.url = vp.New(styles.UrlW, styles.UrlH, "https://www.youtube.com/watch?v=\n_F0-q1jeReY&list=PL-3c1Yp7oGX8MLyYp1-uFq8RMGRQ00whV&index=122&ab_channel=supershigi")
-	m.reqHeader = rq.NewHeaderModel(styles.ReqBodyW, styles.ReqBodyH)
+	m.req = rq.New(styles.ReqBodyW, styles.ReqBodyH)
 	m.reqBody = rq.NewBodyModel(styles.ReqBodyW, styles.ReqBodyH)
 	m.respBody = vp.New(styles.RespBodyW, styles.RespBodyH, "{\n\taaa:bbb\n}")
 	return m
@@ -102,7 +102,7 @@ func (m mainModel) View() string {
 	logo := styles.LogoStyle.Render()
 	method := m.method.Render(m.isActive(methodView))
 	url := m.url.RenderUrl(m.isActive(urlView))
-	reqHeader := m.reqHeader.Render(m.isActive(reqHeaderView))
+	req := m.req.Render(m.isActive(reqView))
 	reqBody := m.reqBody.Render(m.isActive(respBodyView))
 	respBody := m.respBody.RenderRespBody(m.isActive(respBodyView))
 	_ = respBody
@@ -110,7 +110,7 @@ func (m mainModel) View() string {
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, logo, method, url))
 	s.WriteString("\n")
 	fmField := lipgloss.JoinVertical(lipgloss.Left, fm, bm)
-	txtArea := lipgloss.JoinVertical(lipgloss.Left, reqHeader, reqBody)
+	txtArea := lipgloss.JoinVertical(lipgloss.Left, req, reqBody)
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, fmField, txtArea))
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
 	return s.String()
@@ -140,8 +140,8 @@ func (m *mainModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 	case methodView:
 		m.method, cmd = m.method.Update(msg)
 		cmds = append(cmds, cmd)
-	case reqHeaderView:
-		m.reqHeader, cmd = m.reqHeader.Update(msg)
+	case reqView:
+		m.req, cmd = m.req.Update(msg)
 		cmds = append(cmds, cmd)
 	case respBodyView:
 		m.respBody, cmd = m.respBody.Update(msg)
@@ -157,7 +157,7 @@ func (m *mainModel) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 	var cmds []tea.Cmd
 	m.url, cmd = m.url.Update(msg)
 	cmds = append(cmds, cmd)
-	m.reqHeader, cmd = m.reqHeader.Update(msg)
+	m.req, cmd = m.req.Update(msg)
 	cmds = append(cmds, cmd)
 	m.respBody, cmd = m.respBody.Update(msg)
 	cmds = append(cmds, cmd)
@@ -187,9 +187,9 @@ func (m *mainModel) handleFmSuccess(msg model.SuccessMsg) tea.Cmd {
 		m.activeCurl = data.Curl
 		m.method.SetMethod(strings.ToUpper(data.Curl.GetMethod()))
 		m.url.SetContent(data.Curl.GetUrl())
-		m.reqHeader.SetHeader(data.Curl.GetHeader())
+		m.req, cmd = m.req.Update(msg)
 		m.reqBody.SetBody(data.Curl.GetBody())
-		m.respBody.SetContent(strings.Join(data.Curl.GetHeader(), "\n")) //just for test, need remove
+		cmds = append(cmds, cmd)
 		// TODO: render
 	}
 	return tea.Batch(cmds...)
