@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	MODEL_CNT = 2 // TODO: for test set to 2
+	MODEL_CNT = 3
 )
 
 type Model struct {
@@ -23,14 +23,14 @@ type Model struct {
 	header HeaderModel
 	body   BodyModel
 	// TODO: auth
-	rawCurl string
+	rawcurl RawModel
 }
 
 func New(width, height int) Model {
 	m := Model{state: headerView}
 	m.header = NewHeaderModel(width, height)
 	m.body = NewBodyModel(width, height)
-	m.rawCurl = ""
+	m.rawcurl = NewRawModel(width, height)
 	return m
 }
 
@@ -61,6 +61,8 @@ func (m Model) View() string {
 		return m.header.View()
 	case bodyView:
 		return m.body.View()
+	case rawView:
+		return m.rawcurl.View()
 	}
 	return ""
 }
@@ -94,6 +96,9 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 		m.body, cmd = m.body.Update(msg)
 		cmds = append(cmds, cmd)
 		// TODO: update raw curl view
+	case rawView:
+		m.rawcurl, cmd = m.rawcurl.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 	return tea.Batch(cmds...)
 }
@@ -105,6 +110,8 @@ func (m *Model) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 	cmds = append(cmds, cmd)
 	m.body, cmd = m.body.Update(msg)
 	cmds = append(cmds, cmd)
+	m.rawcurl, cmd = m.rawcurl.Update(msg)
+	cmds = append(cmds, cmd)
 	return tea.Batch(cmds...)
 }
 
@@ -115,7 +122,7 @@ func (m *Model) handleSuccess(msg model.SuccessMsg) tea.Cmd {
 		data := msg.Data.(model.AnalyzeSuccessData)
 		m.header.SetHeader(data.Curl.GetHeader())
 		m.body.SetBody(data.Curl.GetBody())
-		// TODO: m.rawCurl need update
+		m.rawcurl.SetRawcurl(data.Curl.GetRawcurl())
 	}
 	return cmd
 }
@@ -129,5 +136,5 @@ func (m *Model) SwitchToNextModel() {
 }
 
 func (m *Model) SwitchToPrevModel() {
-	m.state = (m.state - 1) % MODEL_CNT
+	m.state = (m.state - 1 + MODEL_CNT) % MODEL_CNT
 }

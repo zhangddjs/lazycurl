@@ -100,6 +100,13 @@ func (c *Curl) GetBody() string {
 	return c.Body
 }
 
+func (c *Curl) GetRawcurl() string {
+	if c == nil {
+		return ""
+	}
+	return c.Rawcurl
+}
+
 func (c Curl) BuildCurlCmd() string {
 	cmdParts := make([]string, 0)
 	boolParts := make([]string, 0)
