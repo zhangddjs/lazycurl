@@ -117,14 +117,17 @@ func (m *Model) handleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 
 func (m *Model) handleSuccess(msg model.SuccessMsg) tea.Cmd {
 	var cmd tea.Cmd
+	var cmds []tea.Cmd
 	switch msg.Type {
 	case model.AnalyzeSuccess:
-		data := msg.Data.(model.AnalyzeSuccessData)
-		m.header.SetHeader(data.Curl.GetHeader())
-		m.body.SetBody(data.Curl.GetBody())
-		m.rawcurl.SetRawcurl(data.Curl.GetRawcurl())
+		m.header, cmd = m.header.Update(msg)
+		cmds = append(cmds, cmd)
+		m.body, cmd = m.body.Update(msg)
+		cmds = append(cmds, cmd)
+		m.rawcurl, cmd = m.rawcurl.Update(msg)
+		cmds = append(cmds, cmd)
 	}
-	return cmd
+	return tea.Batch(cmds...)
 }
 
 func (m Model) isActive(state tabState) bool {

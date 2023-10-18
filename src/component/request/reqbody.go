@@ -3,6 +3,7 @@ package request
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	vp "github.com/zhangddjs/lazycurl/component/viewport"
+	"github.com/zhangddjs/lazycurl/model"
 	"github.com/zhangddjs/lazycurl/styles"
 )
 
@@ -29,6 +30,9 @@ func (m BodyModel) Update(msg tea.Msg) (BodyModel, tea.Cmd) {
 		return m, cmd
 	case tea.WindowSizeMsg:
 		m.viewport, cmd = m.viewport.Update(msg)
+		return m, cmd
+	case model.SuccessMsg:
+		cmd = m.handleSuccess(msg)
 		return m, cmd
 	}
 	return m, nil
@@ -69,4 +73,14 @@ func (m *BodyModel) handleKey(msg tea.KeyMsg) tea.Cmd {
 	m.viewport, cmd = m.viewport.Update(msg)
 	cmds = append(cmds, cmd)
 	return tea.Batch(cmds...)
+}
+
+func (m *BodyModel) handleSuccess(msg model.SuccessMsg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg.Type {
+	case model.AnalyzeSuccess:
+		data := msg.Data.(model.AnalyzeSuccessData)
+		m.SetBody(data.Curl.GetBody())
+	}
+	return cmd
 }
